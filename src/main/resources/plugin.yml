@@ -1,0 +1,19 @@
+name: RealizAscend
+version: 1.0.0
+main: com.realizascend.RealizAscend
+api-version: 1.19
+description: Hardcore realistic survival plugin
+author: RealizAscend Team
+softdepend: [BreweryX]
+commands:
+  realiz:
+    description: RealizAscend main command
+    usage: /realiz <reload|info|codex|skill|reset>
+    permission: realizascend.use
+permissions:
+  realizascend.use:
+    description: Allows use of the main command
+    default: true
+  realizascend.admin:
+    description: Admin commands
+    default: op

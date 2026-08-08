@@ -1,0 +1,28 @@
+# Maven build output
+target/
+RealizAscend.jar
+
+# Third-party dependency (not distributed)
+BreweryX-3.4.10.jar
+
+# Local tooling (downloaded Maven distribution)
+.tools/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# VS Code
+.vscode/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Runtime player data (never commit)
+playerdata/

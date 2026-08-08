@@ -1,0 +1,90 @@
+# RealizAscend Configuration
+# Version: 1.0.0
+
+# Season settings
+season:
+  days-per-season: 7
+  initial-season: SPRING
+
+# Temperature settings
+temperature:
+  comfortable-min: 15.0
+  comfortable-max: 25.0
+  warning-offset: 10.0
+  critical-offset: 20.0
+
+# Nutrition settings
+nutrition:
+  max-value: 100.0
+  decay-rate: 0.3
+  warning-threshold: 30.0
+
+# Hydration settings
+hydration:
+  max-value: 100.0
+  decay-rate: 0.5
+  warning-threshold: 25.0
+
+# Bleeding settings
+bleeding:
+  max-blood: 100.0
+  regeneration-rate: 0.1
+  fatal-threshold: 0.0
+
+# Stamina settings
+stamina:
+  max-value: 100.0
+  regeneration-rate: 0.5
+  sprint-cost: 0.3
+  jump-cost: 2.0
+  attack-cost: 1.5
+
+# Fatigue settings
+fatigue:
+  max-value: 100.0
+  accumulation-rate: 0.15
+  sleep-recovery: 80.0
+
+# Stress settings
+stress:
+  max-value: 100.0
+  normal-range-min: 30.0
+  normal-range-max: 70.0
+
+# Weight settings
+weight:
+  normal-limit: 1000.0
+  over-limit: 1500.0
+
+# Torch settings
+torch:
+  duration-minutes: 60
+  fuel-extension-minutes: 30
+
+# Corpse settings
+corpse:
+  duration-days: 1
+  remove-on-expire: true
+
+# World settings
+world:
+  disable-water-source: true
+  block-gravity-whitelist:
+    - SAND
+    - GRAVEL
+    - RED_SAND
+    - ANVIL
+    - DRAGON_EGG
+    - CONCRETE_POWDER
+    - SCAFFOLDING
+    - POINTED_DRIPSTONE
+
+# Skill settings
+skills:
+  xp-gain-multiplier: 1.0
+  max-points-per-skill: 100
+
+# HUD settings
+hud:
+  enabled: true
+  update-interval: 20
