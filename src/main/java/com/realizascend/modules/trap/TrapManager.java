@@ -102,8 +102,9 @@ public class TrapManager extends RealizModule implements Listener {
     }
 
     private void registerRecipes() {
+        // スパイクは鉄塊+棒 (鉄インゴット+棒だと工具レシピと衝突するため鉄塊に変更)
         tryAddRecipe(new ShapelessRecipe(spikeRecipeKey, createTrapItem(SPIKE))
-            .addIngredient(Material.IRON_INGOT)
+            .addIngredient(Material.IRON_NUGGET)
             .addIngredient(Material.STICK));
         tryAddRecipe(new ShapelessRecipe(bearRecipeKey, createTrapItem(BEAR))
             .addIngredient(Material.IRON_INGOT, 2)

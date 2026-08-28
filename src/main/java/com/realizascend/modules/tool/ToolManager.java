@@ -65,27 +65,31 @@ public class ToolManager extends RealizModule implements Listener {
     }
 
     private void registerRecipes() {
-        // Hammer: [IRON_INGOT] [IRON_INGOT] / [IRON_INGOT] [STICK]
+        // 各工具のレシピはパターンと材料セットが完全に一意になるよう設計 (衝突防止)
+        // Hammer: [I][I] / [I][S]  (2x2, 鉄3+棒1) → 鉄の斧
         tryAdd(new ShapedRecipe(hammerRecipeKey, createTool(Material.IRON_AXE, hammerKey, ChatColor.GRAY + "ハンマー", "金属加工に必要"))
             .shape("II", "IS")
             .setIngredient('I', Material.IRON_INGOT)
             .setIngredient('S', Material.STICK));
 
+        // Chisel: [I][ ] / [I][S]  (2x2, 鉄2+棒1) → 石のシャベル
         tryAdd(new ShapedRecipe(chiselRecipeKey, createTool(Material.STONE_SHOVEL, chiselKey, ChatColor.GRAY + "ノミ", "石材加工に必要"))
-            .shape("I", "S")
+            .shape("I ", "IS")
             .setIngredient('I', Material.IRON_INGOT)
             .setIngredient('S', Material.STICK));
 
+        // Saw: [I] / [I]  (縦1x2, 鉄2) → 金の斧
         tryAdd(new ShapedRecipe(sawRecipeKey, createTool(Material.GOLDEN_AXE, sawKey, ChatColor.GRAY + "のこぎり", "木材加工に必要"))
-            .shape("I", "S")
-            .setIngredient('I', Material.IRON_INGOT)
-            .setIngredient('S', Material.STICK));
+            .shape("I", "I")
+            .setIngredient('I', Material.IRON_INGOT));
 
+        // Knife: [I] / [S]  (縦1x2, 鉄1+棒1) → 鉄の剣
         tryAdd(new ShapedRecipe(knifeRecipeKey, createTool(Material.IRON_SWORD, knifeKey, ChatColor.GRAY + "包丁", "調理の品質が上がる"))
             .shape("I", "S")
             .setIngredient('I', Material.IRON_INGOT)
             .setIngredient('S', Material.STICK));
 
+        // Needle: [I] / [T]  (縦1x2, 鉄1+糸1) → ハサミ
         tryAdd(new ShapedRecipe(needleRecipeKey, createTool(Material.SHEARS, needleKey, ChatColor.GRAY + "針", "縫製に必要"))
             .shape("I", "T")
             .setIngredient('I', Material.IRON_INGOT)
@@ -147,13 +151,18 @@ public class ToolManager extends RealizModule implements Listener {
     public boolean hasTool(Player player, String type) {
         NamespacedKey key = getKeyForType(type);
         if (key == null) return false;
-        for (ItemStack item : player.getInventory().getContents()) {
+        ItemStack[] contents = player.getInventory().getContents();
+        for (int i = 0; i < contents.length; i++) {
+            ItemStack item = contents[i];
             if (item != null && item.hasItemMeta()
                 && item.getItemMeta().getPersistentDataContainer().has(key, PersistentDataType.INTEGER)) {
                 return true;
             }
         }
-        return false;
+        // オフハンドも確認
+        ItemStack off = player.getInventory().getItemInOffHand();
+        return off != null && off.hasItemMeta()
+            && off.getItemMeta().getPersistentDataContainer().has(key, PersistentDataType.INTEGER);
     }
 
     public void degradeTool(Player player, String type) {
@@ -181,6 +190,28 @@ public class ToolManager extends RealizModule implements Listener {
                 item.setItemMeta(meta);
             }
             return;
+        }
+        // オフハンドも減らす
+        org.bukkit.inventory.PlayerInventory inv = player.getInventory();
+        ItemStack off = inv.getItemInOffHand();
+        if (off != null && off.hasItemMeta()) {
+            ItemMeta meta = off.getItemMeta();
+            Integer durability = meta.getPersistentDataContainer().get(key, PersistentDataType.INTEGER);
+            if (durability != null) {
+                durability--;
+                if (durability <= 0) {
+                    inv.setItemInOffHand(null);
+                    player.sendMessage(ChatColor.RED + "工具が壊れた!");
+                } else {
+                    meta.getPersistentDataContainer().set(key, PersistentDataType.INTEGER, durability);
+                    List<String> lore = new ArrayList<>(meta.getLore() != null ? meta.getLore() : new ArrayList<>());
+                    if (!lore.isEmpty()) {
+                        lore.set(lore.size() - 1, ChatColor.GRAY + "耐久: " + durability + "/" + TOOL_MAX_DURABILITY);
+                    }
+                    meta.setLore(lore);
+                    off.setItemMeta(meta);
+                }
+            }
         }
     }
 
@@ -216,13 +247,13 @@ public class ToolManager extends RealizModule implements Listener {
         String required = requiredTool(result.getType());
         if (required == null) return;
 
+        // 工具がなければ結果を表示しない (メッセージは実際のクラフト時のみ)
         if (!hasTool(player, required)) {
             event.getInventory().setResult(null);
-            player.sendMessage(ChatColor.RED + "クラフトには" + toolDisplayName(required) + "が必要");
         }
     }
 
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.NORMAL)
     public void onCraft(org.bukkit.event.inventory.CraftItemEvent event) {
         if (!(event.getWhoClicked() instanceof Player player)) return;
         if (event.isCancelled()) return;
@@ -231,9 +262,15 @@ public class ToolManager extends RealizModule implements Listener {
         if (isToolItem(result)) return;
 
         String required = requiredTool(result.getType());
-        if (required != null && hasTool(player, required)) {
-            degradeTool(player, required);
+        if (required == null) return;
+
+        // 第二層チェック: 工具がなければ確実にキャンセル (抜け道防止)
+        if (!hasTool(player, required)) {
+            event.setCancelled(true);
+            player.sendMessage(ChatColor.RED + "クラフトには" + toolDisplayName(required) + "が必要");
+            return;
         }
+        degradeTool(player, required);
     }
 
     private boolean isToolItem(ItemStack item) {
