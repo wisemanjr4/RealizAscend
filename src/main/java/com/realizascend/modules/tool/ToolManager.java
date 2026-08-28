@@ -65,31 +65,36 @@ public class ToolManager extends RealizModule implements Listener {
     }
 
     private void registerRecipes() {
-        // 各工具のレシピはパターンと材料セットが完全に一意になるよう設計 (衝突防止)
-        // Hammer: [I][I] / [I][S]  (2x2, 鉄3+棒1) → 鉄の斧
-        tryAdd(new ShapedRecipe(hammerRecipeKey, createTool(Material.IRON_AXE, hammerKey, ChatColor.GRAY + "ハンマー", "金属加工に必要"))
+        // 各工具は「材料タイプ集合」が一意になるよう設計 (材料数のみで区別しない)。
+        // また鉄/金の実物を素材にすると無劣化武器になるため、木/石段階に抑える。
+        // Hammer: [I][I] / [I][S] (鉄3+棒1) → 石の斧
+        tryAdd(new ShapedRecipe(hammerRecipeKey, createTool(Material.STONE_AXE, hammerKey, ChatColor.GRAY + "ハンマー", "金属加工に必要"))
             .shape("II", "IS")
             .setIngredient('I', Material.IRON_INGOT)
             .setIngredient('S', Material.STICK));
 
-        // Chisel: [I][ ] / [I][S]  (2x2, 鉄2+棒1) → 石のシャベル
+        // Chisel: [I][ ] / [F][S] (鉄1+火打石1+棒1) → 石のシャベル
         tryAdd(new ShapedRecipe(chiselRecipeKey, createTool(Material.STONE_SHOVEL, chiselKey, ChatColor.GRAY + "ノミ", "石材加工に必要"))
-            .shape("I ", "IS")
+            .shape("I ", "FS")
             .setIngredient('I', Material.IRON_INGOT)
+            .setIngredient('F', Material.FLINT)
             .setIngredient('S', Material.STICK));
 
-        // Saw: [I] / [I]  (縦1x2, 鉄2) → 金の斧
-        tryAdd(new ShapedRecipe(sawRecipeKey, createTool(Material.GOLDEN_AXE, sawKey, ChatColor.GRAY + "のこぎり", "木材加工に必要"))
-            .shape("I", "I")
-            .setIngredient('I', Material.IRON_INGOT));
-
-        // Knife: [I] / [S]  (縦1x2, 鉄1+棒1) → 鉄の剣
-        tryAdd(new ShapedRecipe(knifeRecipeKey, createTool(Material.IRON_SWORD, knifeKey, ChatColor.GRAY + "包丁", "調理の品質が上がる"))
-            .shape("I", "S")
+        // Saw: [I][ ] / [B][S] (鉄1+骨1+棒1) → 木の斧
+        tryAdd(new ShapedRecipe(sawRecipeKey, createTool(Material.WOODEN_AXE, sawKey, ChatColor.GRAY + "のこぎり", "木材加工に必要"))
+            .shape("I ", "BS")
             .setIngredient('I', Material.IRON_INGOT)
+            .setIngredient('B', Material.BONE)
             .setIngredient('S', Material.STICK));
 
-        // Needle: [I] / [T]  (縦1x2, 鉄1+糸1) → ハサミ
+        // Knife: [I][ ] / [L][S] (鉄1+革1+棒1) → 木の剣
+        tryAdd(new ShapedRecipe(knifeRecipeKey, createTool(Material.WOODEN_SWORD, knifeKey, ChatColor.GRAY + "包丁", "調理の品質が上がる"))
+            .shape("I ", "LS")
+            .setIngredient('I', Material.IRON_INGOT)
+            .setIngredient('L', Material.LEATHER)
+            .setIngredient('S', Material.STICK));
+
+        // Needle: [I] / [T] (鉄1+糸1) → ハサミ
         tryAdd(new ShapedRecipe(needleRecipeKey, createTool(Material.SHEARS, needleKey, ChatColor.GRAY + "針", "縫製に必要"))
             .shape("I", "T")
             .setIngredient('I', Material.IRON_INGOT)

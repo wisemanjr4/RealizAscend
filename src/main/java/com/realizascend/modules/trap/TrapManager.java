@@ -102,13 +102,16 @@ public class TrapManager extends RealizModule implements Listener {
     }
 
     private void registerRecipes() {
-        // スパイクは鉄塊+棒 (鉄インゴット+棒だと工具レシピと衝突するため鉄塊に変更)
+        // 各罠は材料タイプ集合が一意 (材料数だけで区別しない)
+        // スパイク: 鉄塊+棒 (鉄インゴット+棒だと工具レシピと衝突するため鉄塊)
         tryAddRecipe(new ShapelessRecipe(spikeRecipeKey, createTrapItem(SPIKE))
             .addIngredient(Material.IRON_NUGGET)
             .addIngredient(Material.STICK));
+        // ベア: 鉄+糸+レッドストーン (針の[鉄+糸]と材料数でなくレッドストーンの有無で区別)
         tryAddRecipe(new ShapelessRecipe(bearRecipeKey, createTrapItem(BEAR))
-            .addIngredient(Material.IRON_INGOT, 2)
-            .addIngredient(Material.STRING));
+            .addIngredient(Material.IRON_INGOT)
+            .addIngredient(Material.STRING)
+            .addIngredient(Material.REDSTONE));
         tryAddRecipe(new ShapelessRecipe(poisonRecipeKey, createTrapItem(POISON))
             .addIngredient(Material.IRON_INGOT)
             .addIngredient(Material.SPIDER_EYE)
