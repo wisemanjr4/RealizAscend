@@ -92,8 +92,8 @@ public class DeathManager extends RealizModule implements Listener {
             List<SkillManager.SkillAbility> sortedByCost = new ArrayList<>(SkillManager.ALL_ABILITIES.values());
             sortedByCost.sort((a, b) -> Integer.compare(b.getCost(), a.getCost()));
 
-            player.sendMessage(ChatColor.RED + "Your death has caused skill loss that exceeds your available skill points!");
-            player.sendMessage(ChatColor.RED + "Highest-cost abilities are being removed to compensate...");
+            player.sendMessage(ChatColor.RED + "死亡によるスキルロスが所持スキルポイントを超えている!");
+            player.sendMessage(ChatColor.RED + "コストの高いアビリティが解除される...");
 
             for (SkillManager.SkillAbility ability : sortedByCost) {
                 Integer currentLevel = data.getUnlockedAbilities().get(ability.getId());
@@ -107,7 +107,7 @@ public class DeathManager extends RealizModule implements Listener {
                     deficit -= ability.getCost();
                     currentLevel--;
                     player.sendMessage(ChatColor.GRAY + "  - " + ChatColor.RED + ability.getName()
-                        + ChatColor.GRAY + " has been removed");
+                        + ChatColor.GRAY + " が解除された");
                 }
                 if (deficit <= 0) break;
             }
@@ -116,12 +116,12 @@ public class DeathManager extends RealizModule implements Listener {
         // BUG 12 fix: Clear skill XP on death
         data.getSkillXp().clear();
 
-        player.sendMessage(ChatColor.DARK_RED + "" + ChatColor.BOLD + "=== You Have Died ===");
-        player.sendMessage(ChatColor.GRAY + "Your health, nutrition, hydration, and skills have been penalized.");
-        player.sendMessage(ChatColor.GRAY + "Find your corpse or have a teammate recover your items.");
-        player.sendMessage(ChatColor.GRAY + "Current Health: " + ChatColor.RED + "50"
-            + ChatColor.GRAY + " | Blood: " + ChatColor.RED + "50"
-            + ChatColor.GRAY + " | Hunger: " + ChatColor.RED + "0");
+        player.sendMessage(ChatColor.DARK_RED + "" + ChatColor.BOLD + "=== 死亡しました ===");
+        player.sendMessage(ChatColor.GRAY + "HP・栄養・水分・スキルにペナルティが発生した。");
+        player.sendMessage(ChatColor.GRAY + "死体を探すか、仲間にアイテムを回収してもらおう。");
+        player.sendMessage(ChatColor.GRAY + "現在HP: " + ChatColor.RED + "50"
+            + ChatColor.GRAY + " | 血液: " + ChatColor.RED + "50"
+            + ChatColor.GRAY + " | 空腹: " + ChatColor.RED + "0");
     }
 
     @Override

@@ -115,7 +115,7 @@ public class BleedingManager extends RealizModule implements Listener {
             data.setInfectionProgress(data.getInfectionProgress() + infectionBoost);
             if (data.getInfectionProgress() >= 30.0 && !data.isInfected()) {
                 data.setInfected(true);
-                player.sendMessage(ChatColor.DARK_RED + "Your wound has become infected!");
+                player.sendMessage(ChatColor.DARK_RED + "傷口が感染してしまった!");
             }
         }
 
@@ -124,7 +124,7 @@ public class BleedingManager extends RealizModule implements Listener {
                 event.setDamage(0);
                 player.setHealth(1.0);
                 data.setBlood(5.0);
-                player.sendMessage(ChatColor.GOLD + "Unstoppable prevented your death!");
+                player.sendMessage(ChatColor.GOLD + "不死身が死を防いだ!");
                 player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 200, 2, false, false, true));
                 return;
             }
@@ -241,24 +241,24 @@ public class BleedingManager extends RealizModule implements Listener {
                 player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, blindTicks, 0, false, false, true));
                 player.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, confusionTicks, 0, false, false, true));
                 player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, slowTicks, 0, false, false, true));
-                player.sendMessage(ChatColor.RED + "Head injury! Vision is impaired.");
+                player.sendMessage(ChatColor.RED + "頭部に負傷! 視界が悪い。");
             }
         } else if (roll < 70) {
             if (!data.isTorsoInjured()) {
                 data.setTorsoInjured(true);
                 injuryTimestamps.put(player.getUniqueId(), now);
                 data.setBlood(data.getBlood() - 5.0);
-                player.sendMessage(ChatColor.RED + "Torso injury! Internal bleeding and infection risk.");
+                player.sendMessage(ChatColor.RED + "胴部に負傷! 内出血と感染のリスク。");
             }
         } else {
             if (!data.isLegsInjured()) {
                 data.setLegsInjured(true);
                 injuryTimestamps.put(player.getUniqueId(), now);
                 player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, (int) (400 * debuffDuration), legSlowLevel, false, false, true));
-                player.sendMessage(ChatColor.RED + "Legs injury! Movement impaired.");
+                player.sendMessage(ChatColor.RED + "脚に負傷! 動きが鈍い。");
                 if (!data.isFractured() && random.nextDouble() < 0.3) {
                     data.setFractured(true);
-                    player.sendMessage(ChatColor.DARK_RED + "You hear a crack... your leg is fractured!");
+                    player.sendMessage(ChatColor.DARK_RED + "バキッという音が...脚を骨折した!");
                     player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, (int) (600 * debuffDuration), fractureSlowLevel, false, false, true));
                 }
             }
@@ -281,14 +281,14 @@ public class BleedingManager extends RealizModule implements Listener {
 
         String bar = buildBloodBar(blood / 100.0, 10);
         StringBuilder status = new StringBuilder();
-        if (data.isHeadInjured()) status.append(" H");
-        if (data.isTorsoInjured()) status.append(" T");
-        if (data.isLegsInjured()) status.append(" L");
-        if (data.isInfected()) status.append(" INF");
-        if (data.isFractured()) status.append(" Fx");
+        if (data.isHeadInjured()) status.append(" 頭");
+        if (data.isTorsoInjured()) status.append(" 胴");
+        if (data.isLegsInjured()) status.append(" 脚");
+        if (data.isInfected()) status.append(" 感染");
+        if (data.isFractured()) status.append(" 骨折");
 
         MessageUtil.sendActionBar(player,
-            ChatColor.RED + "Blood: " + bar + " " + String.format("%.0f%%", blood) +
+            ChatColor.RED + "血液: " + bar + " " + String.format("%.0f%%", blood) +
             ChatColor.DARK_RED + status.toString());
     }
 
@@ -362,7 +362,7 @@ public class BleedingManager extends RealizModule implements Listener {
 
                 if (data.isFractured() && data.getNutritionBalance() > 40.0) {
                     data.setFractured(false);
-                    player.sendMessage(ChatColor.GREEN + "Your fracture has healed.");
+                    player.sendMessage(ChatColor.GREEN + "骨折が治った。");
                 }
             }
         }

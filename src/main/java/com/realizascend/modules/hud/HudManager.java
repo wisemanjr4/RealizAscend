@@ -82,25 +82,25 @@ public class HudManager extends RealizModule implements Listener {
 
         double blood = data.getBlood();
         String bloodBar = buildBar(blood, 100, 10);
-        setScore(objective, ChatColor.RED + "\u2764 Blood: " + ChatColor.WHITE + bloodBar
+        setScore(objective, ChatColor.RED + "\u2764 血液: " + ChatColor.WHITE + bloodBar
             + " §f" + formatValue(blood), line--);
 
         double hydration = data.getHydration();
         String hydrationBar = buildBar(hydration, 100, 10);
-        setScore(objective, ChatColor.AQUA + "\uD83D\uDCA7 Water: " + ChatColor.WHITE + hydrationBar
+        setScore(objective, ChatColor.AQUA + "\uD83D\uDCA7 水分: " + ChatColor.WHITE + hydrationBar
             + " §f" + formatValue(hydration), line--);
 
         double stamina = data.getStamina();
         String staminaBar = buildBar(stamina, 100, 10);
-        setScore(objective, ChatColor.YELLOW + "\u26A1 Stamina: " + ChatColor.WHITE + staminaBar
+        setScore(objective, ChatColor.YELLOW + "\u26A1 スタミナ: " + ChatColor.WHITE + staminaBar
             + " §f" + formatValue(stamina), line--);
 
         double nutrition = data.getNutritionBalance();
-        setScore(objective, ChatColor.GREEN + "\uD83C\uDF3F Nutrition: " + ChatColor.WHITE + formatValue(nutrition), line--);
+        setScore(objective, ChatColor.GREEN + "\uD83C\uDF3F 栄養: " + ChatColor.WHITE + formatValue(nutrition), line--);
 
         double stress = data.getStress();
         String stressEmoji = getStressEmoji(stress);
-        setScore(objective, ChatColor.LIGHT_PURPLE + "\uD83D\uDE30 Stress: " + ChatColor.WHITE + stressEmoji, line--);
+        setScore(objective, ChatColor.LIGHT_PURPLE + "\uD83D\uDE30 ストレス: " + ChatColor.WHITE + stressEmoji, line--);
 
         setScore(objective, ChatColor.DARK_GRAY + "━━━━━━━━━━━━━━", line--);
 
@@ -108,16 +108,16 @@ public class HudManager extends RealizModule implements Listener {
         try {
             seasonName = capitalize(plugin.getSeasonManager().getCurrentSeason().name());
         } catch (Exception ignored) {}
-        setScore(objective, ChatColor.GOLD + "Season: " + ChatColor.WHITE + seasonName, line--);
+        setScore(objective, ChatColor.GOLD + "季節: " + ChatColor.WHITE + seasonName, line--);
 
         double temp = 20.0;
         try {
             temp = plugin.getDataManager().getData(player).getBodyTemperature();
         } catch (Exception ignored) {}
-        setScore(objective, ChatColor.AQUA + "Temp: " + ChatColor.WHITE + formatValue(temp) + "°C", line--);
+        setScore(objective, ChatColor.AQUA + "気温: " + ChatColor.WHITE + formatValue(temp) + "°C", line--);
 
         long dayCount = player.getWorld().getFullTime() / 24000;
-        setScore(objective, ChatColor.DARK_GRAY + "Day: " + ChatColor.WHITE + dayCount, line--);
+        setScore(objective, ChatColor.DARK_GRAY + "日目: " + ChatColor.WHITE + dayCount, line--);
 
         setScore(objective, " ", line);
     }

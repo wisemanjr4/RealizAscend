@@ -124,7 +124,7 @@ public class StaminaManager extends RealizModule implements Listener {
         PlayerData data = plugin.getDataManager().getData(player);
         if (data.getFatigue() < 30.0) {
             event.setCancelled(true);
-            player.sendMessage(ChatColor.GRAY + "You are not tired enough to sleep.");
+            player.sendMessage(ChatColor.GRAY + "疲れが足りず眠れない。");
             return;
         }
         bedEnterTime.put(player.getUniqueId(), System.currentTimeMillis());
@@ -151,7 +151,7 @@ public class StaminaManager extends RealizModule implements Listener {
             if (plugin.getSkillManager().getAbilityEffectValue(player, "SLEEP_STAMINA_BOOST") > 1.0) {
                 data.addStaminaBonusPercent(5);
             }
-            player.sendMessage(ChatColor.GREEN + "You feel well-rested. Fatigue recovered!");
+            player.sendMessage(ChatColor.GREEN + "ぐっすり眠れた。疲労が回復した!");
         }
     }
 
@@ -324,7 +324,7 @@ public class StaminaManager extends RealizModule implements Listener {
         String fatBar = MessageUtil.buildBarYellow(fatPct, segCount);
 
         MessageUtil.sendActionBar(player,
-            ChatColor.GREEN + "Sta: " + stamBar + " " + String.format("%.0f%%  ", data.getStamina()) +
-            ChatColor.GOLD + "Fat: " + fatBar + " " + String.format("%.0f%%", data.getFatigue()));
+            ChatColor.GREEN + "スタミナ: " + stamBar + " " + String.format("%.0f%%  ", data.getStamina()) +
+            ChatColor.GOLD + "疲労: " + fatBar + " " + String.format("%.0f%%", data.getFatigue()));
     }
 }

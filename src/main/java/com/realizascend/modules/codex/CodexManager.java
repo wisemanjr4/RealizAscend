@@ -35,15 +35,15 @@ public class CodexManager extends RealizModule implements Listener {
     private static final Map<String, String> entryDescriptions = new LinkedHashMap<>();
 
     static {
-        entryDescriptions.put("punching_trees", "Bare hands against trees? That's a good way to get hurt. Use an axe to chop wood efficiently. Craft one with sticks and planks - oh wait, you need wood for that. Try finding some sticks on the ground or breaking leaves to get started.");
-        entryDescriptions.put("first_death", "Death is not the end, but it's costly. Your health, hunger, hydration, and skills all take a hit. Find your corpse quickly to recover items, or have a teammate grab them for you.");
-        entryDescriptions.put("first_craft", "Crafting is essential for survival. Better tools mean better quality items. Each crafting profession requires specific tools - check the skill menu for details.");
-        entryDescriptions.put("first_cook", "Raw food is barely nutritious and can make you sick. Cook your meals for better nutrition. As your cooking skill grows, you'll unlock better recipes and higher quality meals.");
-        entryDescriptions.put("season_change", "Seasons affect everything from crop growth to body temperature. Each season lasts 7 days. Prepare for winter by stockpiling preserved food and warm clothing.");
-        entryDescriptions.put("starvation", "Your body is running out of fuel. Without calories, you can't maintain body temperature, stamina regeneration slows, and eventually your health will deteriorate. Eat something - anything!");
-        entryDescriptions.put("dehydration", "Water is life. Without it, your body shuts down. Find fresh water sources, but remember - raw water carries infection risk. Boil it first or find clean sources.");
-        entryDescriptions.put("bleeding", "You're losing blood. Apply bandages (paper + string) to stop bleeding. Severe wounds may require stitching. Untreated wounds can become infected, especially if dirty.");
-        entryDescriptions.put("first_kill", "You've taken down your first hostile creature. Combat skills improve with practice. Different weapons have different reach and damage profiles. Watch your stamina during fights.");
+        entryDescriptions.put("punching_trees", "素手で木を叩くのは危険。斧をクラフトして木材を集めよう。まずは落ちている棒や、葉を壊して材料を集めることから始まる。");
+        entryDescriptions.put("first_death", "死は終わりではないが代償は重い。HP・空腹・水分・スキルにペナルティ。素早く死体を回収するか、仲間に回収してもらおう。");
+        entryDescriptions.put("first_craft", "クラフトは生存の基本。道具が良ければ成果物の品質も上がる。クラフトにはジャンルごとの工具が必要な場合がある。");
+        entryDescriptions.put("first_cook", "生の食材は栄養が乏しく、病気になることも。火を通して調理しよう。料理スキルが上がるほど高品質な料理が作れる。");
+        entryDescriptions.put("season_change", "季節は作物の成長から体温まですべてに影響する。各季節は7日間。冬に備えて保存食を備蓄し、暖かい服装を用意しよう。");
+        entryDescriptions.put("starvation", "体の燃料が尽きかけている。カロリーがなければ体温維持もスタミナ回復もできない。何か食べよう。");
+        entryDescriptions.put("dehydration", "水は命。水分が尽きると体は機能しない。安全な水源を探そう。ただし生水は感染リスクがある。煮沸するか浄化しよう。");
+        entryDescriptions.put("bleeding", "血液が減っている。包帯(紙+糸)で止血しよう。深い傷は縫合が必要なことも。手当てしないと感染する恐れがある。");
+        entryDescriptions.put("first_kill", "初めて敵性生物を倒した。戦闘スキルは経験で向上する。武器によってリーチやダメージ特性が異なる。戦闘中のスタミナ管理を忘れずに。");
     }
 
     private final Set<UUID> hasDiedBefore = new HashSet<>();
@@ -69,13 +69,13 @@ public class CodexManager extends RealizModule implements Listener {
         String description = entryDescriptions.get(entryKey);
         if (description == null) return;
 
-        TextComponent header = new TextComponent(ChatColor.GOLD + "" + ChatColor.BOLD + "=== Codex Unlocked! ===");
+        TextComponent header = new TextComponent(ChatColor.GOLD + "" + ChatColor.BOLD + "=== コーデックス解放! ===");
         player.spigot().sendMessage(header);
 
         TextComponent entryLine = new TextComponent(ChatColor.YELLOW + "\"" + description + "\"");
         player.spigot().sendMessage(entryLine);
 
-        TextComponent hint = new TextComponent(ChatColor.GRAY + "Right-click your Codex book to read all entries.");
+        TextComponent hint = new TextComponent(ChatColor.GRAY + "コーデックス本を右クリックして全項目を読もう。");
         hint.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/realiz codex"));
         hint.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Click to open Codex")));
         player.spigot().sendMessage(hint);
@@ -103,7 +103,7 @@ public class CodexManager extends RealizModule implements Listener {
             BookMeta meta = (BookMeta) codexBook.getItemMeta();
             meta.setTitle("Codex");
             meta.setAuthor("RealizAscend");
-            meta.setLore(Collections.singletonList(ChatColor.GRAY + "Your survival guide - new entries unlock as you learn"));
+            meta.setLore(Collections.singletonList(ChatColor.GRAY + "あなたの生存ガイド - 経験とともに項目が解放される"));
             meta.addPage(ChatColor.GOLD + "" + ChatColor.BOLD + "RealizAscend Codex\n\n"
                 + ChatColor.RESET + ChatColor.GRAY + "Right-click to read.\n"
                 + "Entries unlock as you survive and explore.");
@@ -182,7 +182,7 @@ public class CodexManager extends RealizModule implements Listener {
         }
         if (!keys.isEmpty()) {
             player.discoverRecipes(keys);
-            player.sendMessage(ChatColor.GRAY + "All crafting recipes have been unlocked!");
+            player.sendMessage(ChatColor.GRAY + "すべてのクラフトレシピが解放された!");
         }
     }
 

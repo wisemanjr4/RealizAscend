@@ -32,8 +32,8 @@ public class BreweryListener implements Listener {
         double hydrationLoss = 5.0 + alcohol * 0.3;
         data.setHydration(Math.max(0, data.getHydration() - hydrationLoss));
 
-        player.sendMessage(ChatColor.LIGHT_PURPLE + "Stress " + String.format("%.0f", -stressReduction)
-            + ChatColor.GRAY + " | Hydration " + String.format("%.0f", -hydrationLoss)
-            + ChatColor.GRAY + " (Alcohol)");
+        player.sendMessage(ChatColor.LIGHT_PURPLE + "ストレス " + String.format("%.0f", -stressReduction)
+            + ChatColor.GRAY + " | 水分 " + String.format("%.0f", -hydrationLoss)
+            + ChatColor.GRAY + " (アルコール)");
     }
 }

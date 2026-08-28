@@ -29,10 +29,10 @@ public class CookingManager extends RealizModule implements Listener {
     private final Random random = new Random();
 
     private enum Quality {
-        BURNT("Burnt ", ChatColor.DARK_GRAY, 0.7),
+        BURNT("焦げた", ChatColor.DARK_GRAY, 0.7),
         NORMAL("", ChatColor.WHITE, 1.0),
-        WELL_COOKED("Well-cooked ", ChatColor.GREEN, 1.2),
-        PERFECT("Perfect ", ChatColor.GOLD, 1.5);
+        WELL_COOKED("上手に焼けた", ChatColor.GREEN, 1.2),
+        PERFECT("至高の", ChatColor.GOLD, 1.5);
 
         final String prefix;
         final ChatColor color;
@@ -80,17 +80,17 @@ public class CookingManager extends RealizModule implements Listener {
     private String getFoodDisplayBase(ItemStack item) {
         Material mat = item.getType();
         switch (mat) {
-            case COOKED_BEEF: return "Steak";
-            case COOKED_CHICKEN: return "Chicken";
-            case COOKED_COD: return "Cod";
-            case COOKED_MUTTON: return "Mutton";
-            case COOKED_PORKCHOP: return "Porkchop";
-            case COOKED_RABBIT: return "Rabbit";
-            case COOKED_SALMON: return "Salmon";
-            case BAKED_POTATO: return "Potato";
-            case DRIED_KELP: return "Kelp";
-            case BREAD: return "Bread";
-            case PUMPKIN_PIE: return "Pie";
+            case COOKED_BEEF: return "ステーキ";
+            case COOKED_CHICKEN: return "チキン";
+            case COOKED_COD: return "タラ";
+            case COOKED_MUTTON: return "マトン";
+            case COOKED_PORKCHOP: return "ポークチョップ";
+            case COOKED_RABBIT: return "ウサギ肉";
+            case COOKED_SALMON: return "サーモン";
+            case BAKED_POTATO: return "ジャガイモ";
+            case DRIED_KELP: return "昆布";
+            case BREAD: return "パン";
+            case PUMPKIN_PIE: return "パイ";
             default: return item.getType().name().replace("_", " ");
         }
     }
@@ -221,9 +221,9 @@ public class CookingManager extends RealizModule implements Listener {
             item.setAmount(item.getAmount() - 1);
         }
 
-        player.sendMessage(ChatColor.GRAY + "Ate " + quality.color + quality.prefix
-            + getFoodDisplayBase(item) + ChatColor.GRAY + " ("
-            + (int)(multiplier * 100) + "% nutrition)");
+        player.sendMessage(ChatColor.GRAY + "食べた " + quality.color + quality.prefix
+            + getFoodDisplayBase(item) + ChatColor.GRAY + " (栄養 "
+            + (int)(multiplier * 100) + "%)");
     }
 
     private FoodValues getBaseFoodValues(Material mat) {

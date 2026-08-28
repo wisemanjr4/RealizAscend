@@ -19,11 +19,11 @@ public class RealizCommand implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (args.length == 0) {
             sender.sendMessage(ChatColor.GOLD + "=== RealizAscend ===");
-            sender.sendMessage(ChatColor.YELLOW + "/realiz reload " + ChatColor.GRAY + "- Reload config");
-            sender.sendMessage(ChatColor.YELLOW + "/realiz info " + ChatColor.GRAY + "- Plugin info");
-            sender.sendMessage(ChatColor.YELLOW + "/realiz codex " + ChatColor.GRAY + "- Open codex");
-            sender.sendMessage(ChatColor.YELLOW + "/realiz skill " + ChatColor.GRAY + "- Open skill menu");
-            sender.sendMessage(ChatColor.YELLOW + "/realiz reset <player> " + ChatColor.GRAY + "- Reset player data");
+            sender.sendMessage(ChatColor.YELLOW + "/realiz reload " + ChatColor.GRAY + "- 設定を再読み込み");
+            sender.sendMessage(ChatColor.YELLOW + "/realiz info " + ChatColor.GRAY + "- プラグイン情報");
+            sender.sendMessage(ChatColor.YELLOW + "/realiz codex " + ChatColor.GRAY + "- コーデックスを開く");
+            sender.sendMessage(ChatColor.YELLOW + "/realiz skill " + ChatColor.GRAY + "- スキルメニューを開く");
+            sender.sendMessage(ChatColor.YELLOW + "/realiz reset <player> " + ChatColor.GRAY + "- プレイヤーデータをリセット");
             return true;
         }
 
@@ -32,11 +32,11 @@ public class RealizCommand implements CommandExecutor {
         switch (sub) {
             case "reload":
                 if (!sender.hasPermission("realizascend.admin")) {
-                    sender.sendMessage(ChatColor.RED + "No permission.");
+                    sender.sendMessage(ChatColor.RED + "権限がありません。");
                     return true;
                 }
                 plugin.reload();
-                sender.sendMessage(ChatColor.GREEN + "RealizAscend reloaded.");
+                sender.sendMessage(ChatColor.GREEN + "RealizAscend を再読み込みしました。");
                 break;
 
             case "info":
@@ -45,13 +45,13 @@ public class RealizCommand implements CommandExecutor {
                 if (sender instanceof Player) {
                     Player player = (Player) sender;
                     PlayerData data = plugin.getDataManager().getData(player);
-                    sender.sendMessage(ChatColor.YELLOW + "Nutrition Balance: " + String.format("%.1f", data.getNutritionBalance()));
-                    sender.sendMessage(ChatColor.YELLOW + "Hydration: " + String.format("%.1f", data.getHydration()));
-                    sender.sendMessage(ChatColor.YELLOW + "Blood: " + String.format("%.1f", data.getBlood()));
-                    sender.sendMessage(ChatColor.YELLOW + "Stamina: " + String.format("%.1f", data.getStamina()));
-                    sender.sendMessage(ChatColor.YELLOW + "Stress: " + String.format("%.1f", data.getStress()));
-                    sender.sendMessage(ChatColor.YELLOW + "Temperature: " + String.format("%.1f", data.getBodyTemperature()));
-                    sender.sendMessage(ChatColor.YELLOW + "Season: " + plugin.getSeasonManager().getCurrentSeason());
+                    sender.sendMessage(ChatColor.YELLOW + "栄養バランス: " + String.format("%.1f", data.getNutritionBalance()));
+                    sender.sendMessage(ChatColor.YELLOW + "水分: " + String.format("%.1f", data.getHydration()));
+                    sender.sendMessage(ChatColor.YELLOW + "血液: " + String.format("%.1f", data.getBlood()));
+                    sender.sendMessage(ChatColor.YELLOW + "スタミナ: " + String.format("%.1f", data.getStamina()));
+                    sender.sendMessage(ChatColor.YELLOW + "ストレス: " + String.format("%.1f", data.getStress()));
+                    sender.sendMessage(ChatColor.YELLOW + "気温: " + String.format("%.1f", data.getBodyTemperature()));
+                    sender.sendMessage(ChatColor.YELLOW + "季節: " + plugin.getSeasonManager().getCurrentSeason());
                 }
                 break;
 
@@ -69,7 +69,7 @@ public class RealizCommand implements CommandExecutor {
 
             case "reset":
                 if (!sender.hasPermission("realizascend.admin")) {
-                    sender.sendMessage(ChatColor.RED + "No permission.");
+                    sender.sendMessage(ChatColor.RED + "権限がありません。");
                     return true;
                 }
                 if (args.length < 2) {
@@ -78,16 +78,16 @@ public class RealizCommand implements CommandExecutor {
                 }
                 Player target = plugin.getServer().getPlayer(args[1]);
                 if (target == null) {
-                    sender.sendMessage(ChatColor.RED + "Player not found.");
+                    sender.sendMessage(ChatColor.RED + "プレイヤーが見つかりません。");
                     return true;
                 }
                 plugin.getDataManager().removeData(target.getUniqueId());
                 plugin.getDataManager().getData(target);
-                sender.sendMessage(ChatColor.GREEN + "Player data reset for " + target.getName());
+                sender.sendMessage(ChatColor.GREEN + "プレイヤーデータをリセットしました: " + target.getName());
                 break;
 
             default:
-                sender.sendMessage(ChatColor.RED + "Unknown subcommand. Use /realiz for help.");
+                sender.sendMessage(ChatColor.RED + "不明なサブコマンド。/realiz でヘルプを確認。");
                 break;
         }
         return true;

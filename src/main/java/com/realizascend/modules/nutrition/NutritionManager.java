@@ -172,7 +172,7 @@ public class NutritionManager extends RealizModule implements Listener {
             player.getWorld().dropItemNaturally(player.getLocation(), drop);
         }
 
-        MessageUtil.sendActionBar(player, ChatColor.AQUA + "+1 Raw Water Bottle (boil for safety)");
+        MessageUtil.sendActionBar(player, ChatColor.AQUA + "+1 生水ボトル (安全のため煮沸しよう)");
     }
 
     private void handlePotionConsume(Player player, PlayerData data, ItemStack item) {
@@ -185,12 +185,12 @@ public class NutritionManager extends RealizModule implements Listener {
         double hydGain = isRaw ? 20.0 : 40.0;
         data.setHydration(data.getHydration() + hydGain);
 
-        String msg = ChatColor.AQUA + "Hydration " + (isRaw ? "+20 (raw - infection risk!)" : "+40");
+        String msg = ChatColor.AQUA + "水分 " + (isRaw ? "+20 (生水 - 感染リスク!)" : "+40");
         MessageUtil.sendActionBar(player, msg);
 
         if (isRaw && Math.random() < 0.2 * plugin.getSkillManager().getAbilityEffectValue(player, "DISEASE_CHANCE")) {
             data.setInfected(true);
-            player.sendMessage(ChatColor.RED + "You feel sick from drinking raw water...");
+            player.sendMessage(ChatColor.RED + "生水を飲んで気分が悪くなった...");
         }
     }
 
@@ -244,7 +244,7 @@ public class NutritionManager extends RealizModule implements Listener {
         }
 
         if (rawSlot == -1) {
-            MessageUtil.sendActionBar(player, ChatColor.RED + "No raw water bottles in your inventory!");
+            MessageUtil.sendActionBar(player, ChatColor.RED + "インベントリに生水ボトルがない!");
             return;
         }
 
@@ -257,7 +257,7 @@ public class NutritionManager extends RealizModule implements Listener {
         }
 
         player.getInventory().addItem(createCleanWater());
-        MessageUtil.sendActionBar(player, ChatColor.AQUA + "Filtered 1 raw water to clean water!");
+        MessageUtil.sendActionBar(player, ChatColor.AQUA + "生水1つを清浄水に浄化した!");
 
         int durability = getFilterDurability(hand);
         durability--;
@@ -270,7 +270,7 @@ public class NutritionManager extends RealizModule implements Listener {
             } else {
                 player.getInventory().setItemInMainHand(null);
             }
-            MessageUtil.sendActionBar(player, ChatColor.RED + "Your Water Filter broke!");
+            MessageUtil.sendActionBar(player, ChatColor.RED + "浄水フィルターが壊れた!");
         } else {
             setFilterDurability(hand, durability);
         }
@@ -294,10 +294,10 @@ public class NutritionManager extends RealizModule implements Listener {
     private ItemStack createWaterFilter() {
         ItemStack filter = new ItemStack(Material.LEATHER);
         ItemMeta meta = filter.getItemMeta();
-        meta.setDisplayName(ChatColor.GOLD + "Water Filter");
+        meta.setDisplayName(ChatColor.GOLD + "浄水フィルター");
         List<String> lore = new ArrayList<>();
-        lore.add(ChatColor.GRAY + "Right-click to purify raw water");
-        lore.add(ChatColor.GRAY + "Uses: " + FILTER_MAX_DURABILITY + "/" + FILTER_MAX_DURABILITY);
+        lore.add(ChatColor.GRAY + "右クリックで生水を浄化する");
+        lore.add(ChatColor.GRAY + "使用回数: " + FILTER_MAX_DURABILITY + "/" + FILTER_MAX_DURABILITY);
         meta.setLore(lore);
         meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
         meta.getPersistentDataContainer().set(filterKey, PersistentDataType.INTEGER, FILTER_MAX_DURABILITY);
@@ -336,8 +336,8 @@ public class NutritionManager extends RealizModule implements Listener {
         ItemMeta meta = item.getItemMeta();
         meta.getPersistentDataContainer().set(filterKey, PersistentDataType.INTEGER, durability);
         List<String> lore = new ArrayList<>();
-        lore.add(ChatColor.GRAY + "Right-click to purify raw water");
-        lore.add(ChatColor.GRAY + "Uses: " + durability + "/" + FILTER_MAX_DURABILITY);
+        lore.add(ChatColor.GRAY + "右クリックで生水を浄化する");
+        lore.add(ChatColor.GRAY + "使用回数: " + durability + "/" + FILTER_MAX_DURABILITY);
         meta.setLore(lore);
         item.setItemMeta(meta);
     }
@@ -352,15 +352,15 @@ public class NutritionManager extends RealizModule implements Listener {
 
     private void sendFoodFeedback(Player player, Material material, FoodValues food) {
         StringBuilder sb = new StringBuilder();
-        sb.append(ChatColor.GREEN).append("Ate ").append(formatMaterialName(material)).append(": ");
-        appendIfNonZero(sb, "Cal", food.calories);
-        appendIfNonZero(sb, "Pro", food.protein);
-        appendIfNonZero(sb, "Vit", food.vitamins);
-        appendIfNonZero(sb, "Salt", food.salt);
+        sb.append(ChatColor.GREEN).append("食べた ").append(formatMaterialName(material)).append(": ");
+        appendIfNonZero(sb, "カロリー", food.calories);
+        appendIfNonZero(sb, "タンパク質", food.protein);
+        appendIfNonZero(sb, "ビタミン", food.vitamins);
+        appendIfNonZero(sb, "塩分", food.salt);
         if (food.hydration > 0) {
-            sb.append(ChatColor.AQUA).append("Hyd+").append(String.format("%.0f", food.hydration)).append(" ");
+            sb.append(ChatColor.AQUA).append("水分+").append(String.format("%.0f", food.hydration)).append(" ");
         } else if (food.hydration < 0) {
-            sb.append(ChatColor.RED).append("Hyd").append(String.format("%.0f", food.hydration)).append(" ");
+            sb.append(ChatColor.RED).append("水分").append(String.format("%.0f", food.hydration)).append(" ");
         }
         MessageUtil.sendActionBar(player, sb.toString().trim());
     }
@@ -595,8 +595,8 @@ public class NutritionManager extends RealizModule implements Listener {
         String hydBar = MessageUtil.buildBar(data.getHydration() / 100.0, 10);
 
         MessageUtil.sendActionBar(player,
-            color + "Nutri: " + bar + " " + String.format("%.0f%%  ", balance) +
-            ChatColor.AQUA + "Hyd: " + hydBar + " " + String.format("%.0f%%", data.getHydration()));
+            color + "栄養: " + bar + " " + String.format("%.0f%%  ", balance) +
+            ChatColor.AQUA + "水分: " + hydBar + " " + String.format("%.0f%%", data.getHydration()));
     }
 
     private static class FoodValues {

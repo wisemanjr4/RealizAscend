@@ -124,7 +124,7 @@ public class CorpseManager extends RealizModule implements Listener {
 
         ArmorStand stand = player.getWorld().spawn(deathLoc, ArmorStand.class);
         stand.setVisible(true);
-        stand.setCustomName(ChatColor.RED + player.getName() + "'s Corpse");
+        stand.setCustomName(ChatColor.RED + player.getName() + "の死体");
         stand.setCustomNameVisible(true);
         stand.setInvulnerable(true);
         stand.setGravity(false);
@@ -156,7 +156,7 @@ public class CorpseManager extends RealizModule implements Listener {
 
     private void openCorpseInventory(Player player, CorpseData data) {
         Inventory inv = Bukkit.createInventory(null, 54,
-            ChatColor.DARK_RED + data.playerName + "'s Corpse");
+            ChatColor.DARK_RED + data.playerName + "の死体");
 
         for (int i = 0; i < data.inventoryContents.length && i < 54; i++) {
             if (data.inventoryContents[i] != null) {

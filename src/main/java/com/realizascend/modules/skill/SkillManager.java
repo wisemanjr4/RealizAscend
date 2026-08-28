@@ -395,9 +395,9 @@ public class SkillManager extends RealizModule implements Listener {
             }
 
             String displayName = SKILL_TREE_DISPLAY_NAMES.getOrDefault(skillId, skillId);
-            player.sendMessage(ChatColor.GREEN + displayName + " level up! " + ChatColor.GRAY + oldLevel + " -> " + ChatColor.GOLD + currentLevel);
+            player.sendMessage(ChatColor.GREEN + displayName + " がレベルアップ! " + ChatColor.GRAY + oldLevel + " -> " + ChatColor.GOLD + currentLevel);
             if (gainedPoints > 0) {
-                player.sendMessage(ChatColor.YELLOW + "Gained " + gainedPoints + " skill point" + (gainedPoints != 1 ? "s" : "") + "!");
+                player.sendMessage(ChatColor.YELLOW + "スキルポイント +" + gainedPoints + " 獲得!");
             }
             player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 0.5f, 1.5f);
         }
@@ -416,18 +416,18 @@ public class SkillManager extends RealizModule implements Listener {
         int currentLevel = data.getAbilityLevel(ability.getId());
 
         if (currentLevel >= ability.getMaxLevel()) {
-            player.sendMessage(ChatColor.RED + "Ability already maxed: " + ability.getName());
+            player.sendMessage(ChatColor.RED + "このアビリティは最大レベル: " + ability.getName());
             return false;
         }
 
         int spent = getSpentPoints(data, ability.getSkillTree());
         if (spent + ability.getCost() > plugin.getConfigManager().skillsMaxPointsPerSkill) {
-            player.sendMessage(ChatColor.RED + "Max points reached for " + ability.getSkillTree() + " (" + plugin.getConfigManager().skillsMaxPointsPerSkill + " pts)");
+            player.sendMessage(ChatColor.RED + "スキルポイント上限到達: " + ability.getSkillTree() + " (" + plugin.getConfigManager().skillsMaxPointsPerSkill + "pt)");
             return false;
         }
 
         if (data.getSkillPoints() < ability.getCost()) {
-            player.sendMessage(ChatColor.RED + "Not enough skill points! Need " + ability.getCost() + ", have " + data.getSkillPoints());
+            player.sendMessage(ChatColor.RED + "スキルポイント不足! 必要 " + ability.getCost() + "、所持 " + data.getSkillPoints());
             return false;
         }
 
@@ -435,7 +435,7 @@ public class SkillManager extends RealizModule implements Listener {
             if (data.getAbilityLevel(prereqId) <= 0) {
                 SkillAbility prereq = ALL_ABILITIES.get(prereqId);
                 String name = prereq != null ? prereq.getName() : prereqId;
-                player.sendMessage(ChatColor.RED + "Requires: " + name);
+                player.sendMessage(ChatColor.RED + "必要: " + name);
                 return false;
             }
         }
@@ -447,7 +447,7 @@ public class SkillManager extends RealizModule implements Listener {
                 for (SkillAbility other : treeAbilities) {
                     if (other.getId().equals(ability.getId())) continue;
                     if (group != null && group.equals(other.getExclusiveGroup()) && data.getAbilityLevel(other.getId()) > 0) {
-                        player.sendMessage(ChatColor.RED + "Already chosen: " + other.getName() + " (exclusive group)");
+                        player.sendMessage(ChatColor.RED + "すでに選択済み: " + other.getName() + " (二択スキル)");
                         return false;
                     }
                 }
@@ -457,7 +457,7 @@ public class SkillManager extends RealizModule implements Listener {
         data.setSkillPoints(data.getSkillPoints() - ability.getCost());
         data.setAbilityLevel(ability.getId(), currentLevel + 1);
 
-        player.sendMessage(ChatColor.GREEN + "Unlocked: " + ChatColor.GOLD + ability.getName() + ChatColor.GREEN + "!");
+        player.sendMessage(ChatColor.GREEN + "解放: " + ChatColor.GOLD + ability.getName() + ChatColor.GREEN + "!");
         player.playSound(player.getLocation(), Sound.BLOCK_ENCHANTMENT_TABLE_USE, 0.5f, 1.2f);
         return true;
     }
@@ -480,8 +480,8 @@ public class SkillManager extends RealizModule implements Listener {
         data.setSkillXp(skillId, 0);
 
         String displayName = SKILL_TREE_DISPLAY_NAMES.getOrDefault(skillId, skillId);
-        player.sendMessage(ChatColor.RED + "Reset " + displayName + ". Level reduced to " + newLevel + " (penalty: -" + penalty + ")");
-        player.sendMessage(ChatColor.GRAY + "Spent points are lost and not refunded.");
+        player.sendMessage(ChatColor.RED + "リセット: " + displayName + "。レベルが " + newLevel + " に低下 (ペナルティ: -" + penalty + ")");
+        player.sendMessage(ChatColor.GRAY + "使用済みポイントは失われ返還されない。");
     }
 
     public void openSkillMenu(Player player) {

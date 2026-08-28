@@ -201,7 +201,7 @@ public class WeightManager extends RealizModule {
                     String zone = getWeightZone(weight, actualNormal, actualOver);
                     String previousZone = lastZone.get(player.getUniqueId());
 
-                    player.sendActionBar(ChatColor.GRAY + "Weight: " + ChatColor.WHITE
+                    player.sendActionBar(ChatColor.GRAY + "重量: " + ChatColor.WHITE
                         + String.format("%.0f", weight) + ChatColor.GRAY + " / "
                         + ChatColor.WHITE + String.format("%.0f", actualNormal));
 
@@ -209,9 +209,9 @@ public class WeightManager extends RealizModule {
                     if (!zone.equals(previousZone)) {
                         lastZone.put(player.getUniqueId(), zone);
                         if (zone.equals("OVER")) {
-                            player.sendMessage(ChatColor.YELLOW + "You are overburdened! You feel slower.");
+                            player.sendMessage(ChatColor.YELLOW + "重量オーバー! 動きが遅い。");
                         } else if (zone.equals("HEAVY_OVER")) {
-                            player.sendMessage(ChatColor.RED + "You are heavily overburdened! You cannot jump.");
+                            player.sendMessage(ChatColor.RED + "重度の重量オーバー! ジャンプできない。");
                         }
                     }
 
