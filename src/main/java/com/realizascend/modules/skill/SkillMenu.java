@@ -17,7 +17,7 @@ import java.util.Map;
 
 public class SkillMenu {
 
-    private static final String MAIN_TITLE = ChatColor.DARK_GRAY + "Skill Tree";
+    private static final String MAIN_TITLE = ChatColor.DARK_GRAY + "スキルツリー";
     private static final Map<String, Material> TREE_ICONS = Map.ofEntries(
         Map.entry("ENDURANCE", Material.IRON_BOOTS),
         Map.entry("STRENGTH", Material.IRON_SWORD),
@@ -89,7 +89,7 @@ public class SkillMenu {
         ItemStack pointsItem = new ItemStack(POINTS_DISPLAY);
         ItemMeta pointsMeta = pointsItem.getItemMeta();
         if (pointsMeta != null) {
-            pointsMeta.setDisplayName(ChatColor.GREEN + "Skill Points: " + data.getSkillPoints());
+            pointsMeta.setDisplayName(ChatColor.GREEN + "スキルポイント: " + data.getSkillPoints());
             pointsItem.setItemMeta(pointsMeta);
         }
         inv.setItem(53, pointsItem);
@@ -114,12 +114,12 @@ public class SkillMenu {
 
         String itemName = ChatColor.stripColor(meta.getDisplayName());
 
-        if (itemName.equals("Close")) {
+        if (itemName.equals("閉じる")) {
             player.closeInventory();
             return;
         }
 
-        if (itemName.equals("Back")) {
+        if (itemName.equals("戻る")) {
             openMainMenu(player, manager);
             return;
         }
@@ -178,13 +178,13 @@ public class SkillMenu {
         double progress = xpForNext > 0 ? Math.min(1.0, xp / xpForNext) : 1.0;
 
         List<String> lore = new ArrayList<>();
-        lore.add(ChatColor.GRAY + "Level: " + ChatColor.WHITE + level);
+        lore.add(ChatColor.GRAY + "レベル: " + ChatColor.WHITE + level);
         lore.add("");
-        lore.add(ChatColor.GRAY + "Progress to next level:");
+        lore.add(ChatColor.GRAY + "次のレベルまで:");
         lore.add(MessageUtil.buildBar(progress, 20));
         lore.add(ChatColor.GRAY + String.format("%.0f / %d XP", xp, xpForNext));
         lore.add("");
-        lore.add(ChatColor.YELLOW + "Click to view abilities");
+        lore.add(ChatColor.YELLOW + "クリックでアビリティを見る");
 
         meta.setLore(lore);
         item.setItemMeta(meta);
@@ -215,15 +215,15 @@ public class SkillMenu {
 
         List<String> lore = new ArrayList<>();
         if (ability.getMaxLevel() > 1) {
-            lore.add(ChatColor.GRAY + "Level: " + ChatColor.WHITE + currentLevel + "/" + ability.getMaxLevel());
+            lore.add(ChatColor.GRAY + "レベル: " + ChatColor.WHITE + currentLevel + "/" + ability.getMaxLevel());
         }
-        lore.add(ChatColor.GRAY + "Cost: " + ChatColor.GOLD + ability.getCost() + " point" + (ability.getCost() != 1 ? "s" : ""));
+        lore.add(ChatColor.GRAY + "コスト: " + ChatColor.GOLD + ability.getCost() + " ポイント");
         lore.add("");
         lore.add(ChatColor.WHITE + ability.getDescription());
         lore.add("");
 
         if (!ability.getPrerequisites().isEmpty()) {
-            lore.add(ChatColor.GRAY + "Requires:");
+            lore.add(ChatColor.GRAY + "必要:");
             for (String prereqId : ability.getPrerequisites()) {
                 SkillManager.SkillAbility prereq = SkillManager.getAbility(prereqId);
                 if (prereq != null) {
@@ -236,19 +236,19 @@ public class SkillMenu {
         }
 
         if (ability.isExclusive()) {
-            lore.add(ChatColor.LIGHT_PURPLE + "Exclusive: " + ability.getExclusiveGroup());
-            lore.add(ChatColor.GRAY + "Cannot take other abilities in this group");
+            lore.add(ChatColor.LIGHT_PURPLE + "二択: " + ability.getExclusiveGroup());
+            lore.add(ChatColor.GRAY + "このグループの他アビリティは取得不可");
             lore.add("");
         }
 
         if (isUnlocked) {
-            lore.add(ChatColor.GREEN + "UNLOCKED");
+            lore.add(ChatColor.GREEN + "解放済み");
         } else if (canAfford && prereqsMet) {
-            lore.add(ChatColor.YELLOW + "Click to unlock!");
+            lore.add(ChatColor.YELLOW + "クリックで解放!");
         } else if (!prereqsMet) {
-            lore.add(ChatColor.RED + "Prerequisites not met");
+            lore.add(ChatColor.RED + "前提条件を満たしていません");
         } else {
-            lore.add(ChatColor.RED + "Not enough skill points");
+            lore.add(ChatColor.RED + "スキルポイント不足");
         }
 
         meta.setLore(lore);
@@ -278,7 +278,7 @@ public class SkillMenu {
         ItemStack item = new ItemStack(CLOSE_BUTTON);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName(ChatColor.RED + "Close");
+            meta.setDisplayName(ChatColor.RED + "閉じる");
             item.setItemMeta(meta);
         }
         return item;
@@ -288,7 +288,7 @@ public class SkillMenu {
         ItemStack item = new ItemStack(BACK_BUTTON);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName(ChatColor.YELLOW + "Back");
+            meta.setDisplayName(ChatColor.YELLOW + "戻る");
             item.setItemMeta(meta);
         }
         return item;
