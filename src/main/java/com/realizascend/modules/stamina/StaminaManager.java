@@ -94,7 +94,7 @@ public class StaminaManager extends RealizModule implements Listener {
         Player player = event.getPlayer();
         PlayerData data = plugin.getDataManager().getData(player);
         ConfigManager cfg = plugin.getConfigManager();
-        data.setFatigue(data.getFatigue() + 0.2);
+        data.setFatigue(data.getFatigue() + 0.1);
     }
 
     @EventHandler
@@ -105,7 +105,7 @@ public class StaminaManager extends RealizModule implements Listener {
         // 速築き: ブロック設置のスタミナ消費-40%
         double buildCost = plugin.getSkillManager().getAbilityEffectValue(player, "BUILD_STAMINA_COST");
         data.setStamina(data.getStamina() - cfg.staminaAttackCost * 0.5 * buildCost);
-        data.setFatigue(data.getFatigue() + 0.1);
+        data.setFatigue(data.getFatigue() + 0.05);
     }
 
     private boolean hostileNear(Player player) {
@@ -159,7 +159,7 @@ public class StaminaManager extends RealizModule implements Listener {
         PlayerData data = plugin.getDataManager().getData(player);
         ConfigManager cfg = plugin.getConfigManager();
         data.setStamina(data.getStamina() - cfg.staminaJumpCost);
-        data.setFatigue(data.getFatigue() + 1.0);
+        data.setFatigue(data.getFatigue() + 0.4);
     }
 
     private void applyAttackCost(Player player) {
@@ -167,7 +167,7 @@ public class StaminaManager extends RealizModule implements Listener {
         ConfigManager cfg = plugin.getConfigManager();
         double meleeCost = plugin.getSkillManager().getAbilityEffectValue(player, "MELEE_STAMINA_COST");
         data.setStamina(data.getStamina() - cfg.staminaAttackCost * meleeCost);
-        data.setFatigue(data.getFatigue() + 0.5);
+        data.setFatigue(data.getFatigue() + 0.2);
     }
 
     private class TickRunnable extends BukkitRunnable {
@@ -221,7 +221,7 @@ public class StaminaManager extends RealizModule implements Listener {
                         double cost = cfg.staminaSprintCost * sprintCostMult * tempZoneMult;
                         if (player.isSwimming()) cost *= waterCostMult;
                         data.setStamina(data.getStamina() - cost);
-                        data.setFatigue(data.getFatigue() + 0.3);
+                        data.setFatigue(data.getFatigue() + 0.15);
                     } else if (player.isClimbing()) {
                         data.setStamina(data.getStamina() - cfg.staminaSprintCost * 0.15 * climbCostMult * tempZoneMult);
                     } else if (!player.isFlying() && !player.isSwimming() && player.isOnGround()) {

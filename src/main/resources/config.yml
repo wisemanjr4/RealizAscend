@@ -42,7 +42,7 @@ stamina:
 # Fatigue settings
 fatigue:
   max-value: 100.0
-  accumulation-rate: 0.15
+  accumulation-rate: 0.05
   sleep-recovery: 80.0
 
 # Stress settings
