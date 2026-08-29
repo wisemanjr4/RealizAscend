@@ -13,7 +13,7 @@ import com.realizascend.modules.stamina.StaminaManager;
 import com.realizascend.modules.weight.WeightManager;
 import com.realizascend.modules.skill.SkillManager;
 import com.realizascend.modules.cooking.CookingManager;
-import com.realizascend.modules.corpse.CorpseManager;
+import com.realizascend.modules.grave.GraveManager;
 import com.realizascend.modules.codex.CodexManager;
 import com.realizascend.modules.world.WorldManager;
 import com.realizascend.modules.death.DeathManager;
@@ -45,7 +45,7 @@ public final class RealizAscend extends JavaPlugin {
     private WeightManager weightManager;
     private SkillManager skillManager;
     private CookingManager cookingManager;
-    private CorpseManager corpseManager;
+    private GraveManager graveManager;
     private CodexManager codexManager;
     private WorldManager worldManager;
     private DeathManager deathManager;
@@ -78,7 +78,7 @@ public final class RealizAscend extends JavaPlugin {
         weightManager = new WeightManager(this);
         skillManager = new SkillManager(this);
         cookingManager = new CookingManager(this);
-        corpseManager = new CorpseManager(this);
+        graveManager = new GraveManager(this);
         codexManager = new CodexManager(this);
         worldManager = new WorldManager(this);
         deathManager = new DeathManager(this);
@@ -103,7 +103,7 @@ public final class RealizAscend extends JavaPlugin {
             weightManager,
             skillManager,
             cookingManager,
-            corpseManager,
+            graveManager,
             codexManager,
             worldManager,
             deathManager,
@@ -157,7 +157,7 @@ public final class RealizAscend extends JavaPlugin {
     public WeightManager getWeightManager() { return weightManager; }
     public SkillManager getSkillManager() { return skillManager; }
     public CookingManager getCookingManager() { return cookingManager; }
-    public CorpseManager getCorpseManager() { return corpseManager; }
+    public GraveManager getGraveManager() { return graveManager; }
     public CodexManager getCodexManager() { return codexManager; }
     public WorldManager getWorldManager() { return worldManager; }
     public DeathManager getDeathManager() { return deathManager; }
