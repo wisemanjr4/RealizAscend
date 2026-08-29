@@ -26,11 +26,11 @@ public class BreweryListener implements Listener {
         int alcohol = event.getAddedAlcohol();
         int quality = event.getQuality();
 
-        // 酒はストレスを大きく下げる (アルコール度数が高いほど効く)
-        double stressReduction = alcohol * 2.0 + quality * 0.5;
+        // ストレス低下は「品質」主体。上質な酒ほど良く効く (質が悪いと逆に効かない/不快)
+        double stressReduction = quality * 1.5 + alcohol * 0.3;
         data.setStress(Math.max(0, data.getStress() - stressReduction));
 
-        // 飲み過ぎると喉が渇く (水分低下もそれなりに)
+        // 喉の渇きはアルコール度数に応じる
         double hydrationLoss = 6.0 + alcohol * 0.5;
         data.setHydration(Math.max(0, data.getHydration() - hydrationLoss));
 
