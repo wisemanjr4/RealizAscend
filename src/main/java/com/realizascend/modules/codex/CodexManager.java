@@ -44,6 +44,43 @@ public class CodexManager extends RealizModule implements Listener {
         entryDescriptions.put("dehydration", "水は命。水分が尽きると体は機能しない。安全な水源を探そう。ただし生水は感染リスクがある。煮沸するか浄化しよう。");
         entryDescriptions.put("bleeding", "血液が減っている。包帯(紙+糸)で止血しよう。深い傷は縫合が必要なことも。手当てしないと感染する恐れがある。");
         entryDescriptions.put("first_kill", "初めて敵性生物を倒した。戦闘スキルは経験で向上する。武器によってリーチやダメージ特性が異なる。戦闘中のスタミナ管理を忘れずに。");
+        entryDescriptions.put("stress_management", "ストレスが高まっている。下げるには、明るい場所に居る・焚き火やかまどのそばで休む・栄養バランスと水分を保つ・よく眠る・酒を飲む。暗い場所や敵のそば、極端な温度はストレスを上げる。");
+    }
+
+    // 常時閲覧できる生存知識ページ (経験で解放されるエントリとは別)
+    private static final List<String> REFERENCE_PAGES = new ArrayList<>();
+
+    static {
+        REFERENCE_PAGES.add(ChatColor.GOLD + "" + ChatColor.BOLD + "生存知識: ストレス\n\n"
+            + ChatColor.RESET + ChatColor.GRAY
+            + "ストレスは暗い場所・敵のそば・極端な温度・睡眠不足・負傷で上がる。\n\n"
+            + "下げるには:\n・明るい場所に居る\n・焚き火やかまどのそばで休む\n・栄養バランスと水分を保つ\n・よく眠る\n・酒を飲む");
+        REFERENCE_PAGES.add(ChatColor.GOLD + "" + ChatColor.BOLD + "生存知識: 体温\n\n"
+            + ChatColor.RESET + ChatColor.GRAY
+            + "寒い時は焚き火のそばや屋内で過ごし、熱い料理を食べる。\n"
+            + "暑い時は日陰に入り、通気の良い装備に着替え、冷たい物を食べる。\n\n"
+            + "防具には保温値と遮熱値があり、砂漠で重装備は逆効果。\n"
+            + "体温が危険域に達するとHPが減る。");
+        REFERENCE_PAGES.add(ChatColor.GOLD + "" + ChatColor.BOLD + "生存知識: 栄養と水分\n\n"
+            + ChatColor.RESET + ChatColor.GRAY
+            + "カロリー・タンパク質・ビタミン・塩分をバランス良く摂ろう。\n"
+            + "・生水は煮沸するかフィルターで浄化\n"
+            + "・生肉は食中毒の恐れがある\n"
+            + "・燻製・塩漬け・乾燥は保存が利く\n"
+            + "・塩分過多は喉が渇きやすくなる");
+        REFERENCE_PAGES.add(ChatColor.GOLD + "" + ChatColor.BOLD + "生存知識: 負傷と感染\n\n"
+            + ChatColor.RESET + ChatColor.GRAY
+            + "負傷は放置すると危険。適切に手当てしよう。\n"
+            + "・出血・負傷 → 包帯(紙+糸)\n"
+            + "・骨折 → 添え木(棒+糸)\n"
+            + "・感染 → 消毒液(瓶+砂糖+木炭) 抗生物質(瓶+砂糖+赤キノコ)\n"
+            + "・負傷したまま水や土に触れると感染しやすい");
+        REFERENCE_PAGES.add(ChatColor.GOLD + "" + ChatColor.BOLD + "生存知識: 疲労・睡眠・重量\n\n"
+            + ChatColor.RESET + ChatColor.GRAY
+            + "疲労が貯まると眠くなる。疲労が30以上で睡眠可能。\n"
+            + "眠ると疲労が回復し、健康度も少し戻る。\n\n"
+            + "重量に注意: オーバーで鈍足、重度オーバーでジャンプ不可。\n"
+            + "スキルの筋力や工具で上限を上げられる。");
     }
 
     private final Set<UUID> hasDiedBefore = new HashSet<>();
@@ -105,8 +142,8 @@ public class CodexManager extends RealizModule implements Listener {
             meta.setAuthor("RealizAscend");
             meta.setLore(Collections.singletonList(ChatColor.GRAY + "あなたの生存ガイド - 経験とともに項目が解放される"));
             meta.addPage(ChatColor.GOLD + "" + ChatColor.BOLD + "RealizAscend Codex\n\n"
-                + ChatColor.RESET + ChatColor.GRAY + "Right-click to read.\n"
-                + "Entries unlock as you survive and explore.");
+                + ChatColor.RESET + ChatColor.GRAY + "右クリックで読む。\n"
+                + "経験とともに項目が解放される。");
             codexBook.setItemMeta(meta);
             player.getInventory().addItem(codexBook);
         }
@@ -137,8 +174,15 @@ public class CodexManager extends RealizModule implements Listener {
         List<String> pages = new ArrayList<>();
 
         pages.add(ChatColor.GOLD + "" + ChatColor.BOLD + "RealizAscend Codex\n\n"
-            + ChatColor.RESET + ChatColor.GRAY + "Entries unlocked: "
-            + ChatColor.WHITE + data.getCodexEntries().size() + "/" + entryDescriptions.size());
+            + ChatColor.RESET + ChatColor.GRAY + "解放済みエントリ: "
+            + ChatColor.WHITE + data.getCodexEntries().size() + "/" + entryDescriptions.size() + "\n\n"
+            + ChatColor.GRAY + "冒頭の生存知識はいつでも読める。\n"
+            + "エントリは経験とともに解放される。");
+
+        // 常時閲覧できる生存知識ページ
+        for (String refPage : REFERENCE_PAGES) {
+            pages.add(refPage);
+        }
 
         for (Map.Entry<String, String> entry : entryDescriptions.entrySet()) {
             if (data.hasCodexEntry(entry.getKey())) {

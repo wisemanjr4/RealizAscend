@@ -25,6 +25,7 @@ public class StressManager extends RealizModule implements Listener {
     private static final long STRESS_INTERVAL = 200L;
 
     private BukkitTask stressTask;
+    private final java.util.Set<java.util.UUID> stressWarned = new java.util.HashSet<>();
 
     public StressManager(RealizAscend plugin) {
         super(plugin);
@@ -39,6 +40,7 @@ public class StressManager extends RealizModule implements Listener {
     @Override
     public void onDisable() {
         if (stressTask != null) { stressTask.cancel(); stressTask = null; }
+        stressWarned.clear();
         HandlerList.unregisterAll(this);
     }
 
@@ -77,6 +79,11 @@ public class StressManager extends RealizModule implements Listener {
                 data.setStress(data.getStress() + delta);
                 applyStressEffects(player, data, cfg);
                 displayStress(player, data);
+
+                // 初めてストレスが高まったらコーデックス解放
+                if (data.getStress() > 70 && stressWarned.add(player.getUniqueId())) {
+                    plugin.getCodexManager().unlockEntry(player, "stress_management");
+                }
             }
         }
     }
