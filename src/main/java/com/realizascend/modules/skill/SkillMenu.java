@@ -17,7 +17,7 @@ import java.util.Map;
 
 public class SkillMenu {
 
-    private static final String MAIN_TITLE = ChatColor.DARK_GRAY + "スキルツリー";
+    public static final String MAIN_TITLE = ChatColor.DARK_GRAY + "スキルツリー";
     private static final Map<String, Material> TREE_ICONS = Map.ofEntries(
         Map.entry("ENDURANCE", Material.IRON_BOOTS),
         Map.entry("STRENGTH", Material.IRON_SWORD),
