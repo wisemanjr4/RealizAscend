@@ -57,19 +57,19 @@ public class DeathManager extends RealizModule implements Listener {
         Player player = event.getPlayer();
         PlayerData data = plugin.getDataManager().getData(player);
 
-        player.setHealth(Math.max(2, player.getMaxHealth() * 0.5));
+        player.setHealth(Math.max(6, player.getMaxHealth() * 0.7));
         player.setFoodLevel((int) Math.round(data.getNutritionBalance() / 100.0 * 20.0));
         player.setSaturation(0);
 
-        data.setHealthLevel(50);
-        data.setCalories(0);
-        data.setProtein(0);
-        data.setVitamins(0);
-        data.setSalt(0);
-        data.setHydration(0);
-        data.setBlood(50);
-        data.setStamina(30);
-        data.setFatigue(50);
+        data.setHealthLevel(70);
+        data.setCalories(30);
+        data.setProtein(30);
+        data.setVitamins(30);
+        data.setSalt(30);
+        data.setHydration(40);
+        data.setBlood(70);
+        data.setStamina(50);
+        data.setFatigue(40);
 
         Map<String, Integer> skillLevels = data.getSkillLevels();
         Map<String, Integer> newSkillLevels = new HashMap<>();
@@ -119,9 +119,9 @@ public class DeathManager extends RealizModule implements Listener {
         player.sendMessage(ChatColor.DARK_RED + "" + ChatColor.BOLD + "=== 死亡しました ===");
         player.sendMessage(ChatColor.GRAY + "HP・栄養・水分・スキルにペナルティが発生した。");
         player.sendMessage(ChatColor.GRAY + "死体を探すか、仲間にアイテムを回収してもらおう。");
-        player.sendMessage(ChatColor.GRAY + "現在HP: " + ChatColor.RED + "50"
-            + ChatColor.GRAY + " | 血液: " + ChatColor.RED + "50"
-            + ChatColor.GRAY + " | 空腹: " + ChatColor.RED + "0");
+        player.sendMessage(ChatColor.GRAY + "現在HP: " + ChatColor.RED + "70"
+            + ChatColor.GRAY + " | 血液: " + ChatColor.RED + "70"
+            + ChatColor.GRAY + " | 空腹: " + ChatColor.RED + "30");
     }
 
     @Override
