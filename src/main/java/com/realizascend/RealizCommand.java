@@ -42,7 +42,7 @@ public class RealizCommand implements CommandExecutor {
 
             case "info":
                 sender.sendMessage(ChatColor.GOLD + "RealizAscend v1.0.0");
-                sender.sendMessage(ChatColor.GRAY + "Hardcore realistic survival plugin");
+                sender.sendMessage(ChatColor.GRAY + "鬼畜リアル系サバイバルプラグイン");
                 if (sender instanceof Player) {
                     Player player = (Player) sender;
                     PlayerData data = plugin.getDataManager().getData(player);
@@ -91,7 +91,7 @@ public class RealizCommand implements CommandExecutor {
                     return true;
                 }
                 if (args.length < 2) {
-                    sender.sendMessage(ChatColor.RED + "Usage: /realiz reset <player>");
+                    sender.sendMessage(ChatColor.RED + "使い方: /realiz reset <プレイヤー名>");
                     return true;
                 }
                 Player target = plugin.getServer().getPlayer(args[1]);

@@ -13,7 +13,7 @@ public class MessageUtil {
 
     public static void sendCodexUnlock(Player player, String entry) {
         player.sendMessage("");
-        player.sendMessage(ChatColor.GOLD + "=== " + ChatColor.BOLD + "Codex Unlocked!" + ChatColor.GOLD + " ===");
+        player.sendMessage(ChatColor.GOLD + "=== " + ChatColor.BOLD + "コーデックス解放!" + ChatColor.GOLD + " ===");
         player.sendMessage(ChatColor.YELLOW + "\"" + entry + "\"");
         player.sendMessage("");
     }

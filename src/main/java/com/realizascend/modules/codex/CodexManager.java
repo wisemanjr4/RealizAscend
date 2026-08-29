@@ -50,6 +50,21 @@ public class CodexManager extends RealizModule implements Listener {
     // 常時閲覧できる生存知識ページ (経験で解放されるエントリとは別)
     private static final List<String> REFERENCE_PAGES = new ArrayList<>();
 
+    private static final Map<String, String> ENTRY_TITLES = new LinkedHashMap<>();
+
+    static {
+        ENTRY_TITLES.put("punching_trees", "拳で木を叩いた");
+        ENTRY_TITLES.put("first_death", "初めての死");
+        ENTRY_TITLES.put("first_craft", "初めてのクラフト");
+        ENTRY_TITLES.put("first_cook", "初めての料理");
+        ENTRY_TITLES.put("season_change", "季節の移り変わり");
+        ENTRY_TITLES.put("starvation", "飢餓");
+        ENTRY_TITLES.put("dehydration", "脱水");
+        ENTRY_TITLES.put("bleeding", "失血");
+        ENTRY_TITLES.put("first_kill", "初めての戦い");
+        ENTRY_TITLES.put("stress_management", "心のケア");
+    }
+
     static {
         REFERENCE_PAGES.add(ChatColor.GOLD + "" + ChatColor.BOLD + "心の持ちよう\n\n"
             + ChatColor.RESET + ChatColor.GRAY
@@ -90,15 +105,17 @@ public class CodexManager extends RealizModule implements Listener {
             + "燻製や塩漬けは長持ちする。");
         REFERENCE_PAGES.add(ChatColor.GOLD + "" + ChatColor.BOLD + "傷の手当て\n\n"
             + ChatColor.RESET + ChatColor.GRAY
-            + "傷は放っておくと悪くなる。\n"
-            + "血が出たら布で巻き、\n"
-            + "骨が折れたら棒で固定する。\n"
+            + "血が出たら、紙と糸で\n"
+            + "巻くと止血になる。\n"
+            + "骨が折れたら、棒と糸で\n"
+            + "固定すると具合がいい。\n\n"
             + "傷が化膿して熱を持つようなら、\n"
-            + "薬で治すしかない。\n\n"
+            + "瓶と砂糖に何かを混ぜて\n"
+            + "薬らしきものを作れそうだ。\n"
+            + "炭を混ぜれば消毒に、\n"
+            + "赤い茸ならもっと強い薬に。\n\n"
             + "汚れた水や土に触れた傷は\n"
-            + "特に治りにくい。\n"
-            + "早めに手当てした方が\n"
-            + "結局は楽だ。");
+            + "特に治りにくい。");
         REFERENCE_PAGES.add(ChatColor.GOLD + "" + ChatColor.BOLD + "休み方と荷物\n\n"
             + ChatColor.RESET + ChatColor.GRAY
             + "眠くなったら寝るのが\n"
@@ -142,7 +159,7 @@ public class CodexManager extends RealizModule implements Listener {
 
         TextComponent hint = new TextComponent(ChatColor.GRAY + "コーデックス本を右クリックして全項目を読もう。");
         hint.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/realiz codex"));
-        hint.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Click to open Codex")));
+        hint.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("クリックで開く")));
         player.spigot().sendMessage(hint);
 
         player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
@@ -156,7 +173,7 @@ public class CodexManager extends RealizModule implements Listener {
         for (ItemStack item : contents) {
             if (item != null && item.getType() == Material.WRITTEN_BOOK) {
                 BookMeta meta = (BookMeta) item.getItemMeta();
-                if (meta != null && "Codex".equals(meta.getTitle())) {
+                if (meta != null && "コーデックス".equals(meta.getTitle())) {
                     hasCodex = true;
                     break;
                 }
@@ -166,10 +183,10 @@ public class CodexManager extends RealizModule implements Listener {
         if (!hasCodex) {
             ItemStack codexBook = new ItemStack(Material.WRITTEN_BOOK);
             BookMeta meta = (BookMeta) codexBook.getItemMeta();
-            meta.setTitle("Codex");
+            meta.setTitle("コーデックス");
             meta.setAuthor("RealizAscend");
             meta.setLore(Collections.singletonList(ChatColor.GRAY + "あなたの生存ガイド - 経験とともに項目が解放される"));
-            meta.addPage(ChatColor.GOLD + "" + ChatColor.BOLD + "RealizAscend Codex\n\n"
+            meta.addPage(ChatColor.GOLD + "" + ChatColor.BOLD + "RealizAscend コーデックス\n\n"
                 + ChatColor.RESET + ChatColor.GRAY + "右クリックで読む。\n"
                 + "経験とともに項目が解放される。");
             codexBook.setItemMeta(meta);
@@ -196,12 +213,12 @@ public class CodexManager extends RealizModule implements Listener {
 
         ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
         BookMeta meta = (BookMeta) book.getItemMeta();
-        meta.setTitle("Codex");
+        meta.setTitle("コーデックス");
         meta.setAuthor("RealizAscend");
 
         List<String> pages = new ArrayList<>();
 
-        pages.add(ChatColor.GOLD + "" + ChatColor.BOLD + "RealizAscend Codex\n\n"
+        pages.add(ChatColor.GOLD + "" + ChatColor.BOLD + "RealizAscend コーデックス\n\n"
             + ChatColor.RESET + ChatColor.GRAY + "解放済みエントリ: "
             + ChatColor.WHITE + data.getCodexEntries().size() + "/" + entryDescriptions.size() + "\n\n"
             + ChatColor.GRAY + "冒頭の生存知識はいつでも読める。\n"
@@ -214,8 +231,8 @@ public class CodexManager extends RealizModule implements Listener {
 
         for (Map.Entry<String, String> entry : entryDescriptions.entrySet()) {
             if (data.hasCodexEntry(entry.getKey())) {
-                String displayKey = entry.getKey().replace("_", " ");
-                String page = ChatColor.GREEN + "" + ChatColor.BOLD + displayKey.toUpperCase() + "\n\n"
+                String displayKey = ENTRY_TITLES.getOrDefault(entry.getKey(), entry.getKey());
+                String page = ChatColor.GREEN + "" + ChatColor.BOLD + displayKey + "\n\n"
                     + ChatColor.RESET + ChatColor.GRAY + entry.getValue();
                 pages.add(page);
             }

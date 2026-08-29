@@ -218,12 +218,43 @@ public class CookingManager extends RealizModule implements Listener {
         }
 
         if (player.getGameMode() != GameMode.CREATIVE) {
-            item.setAmount(item.getAmount() - 1);
+            // event.getItem()はコピーの可能性があるため、インベントリから確実に1つ消費する
+            consumeOne(player, qualityKey);
         }
 
         player.sendMessage(ChatColor.GRAY + "食べた " + quality.color + quality.prefix
             + getFoodDisplayBase(item) + ChatColor.GRAY + " (栄養 "
             + (int)(multiplier * 100) + "%)");
+    }
+
+    private void consumeOne(Player player, NamespacedKey qualityKey) {
+        org.bukkit.inventory.PlayerInventory inv = player.getInventory();
+        ItemStack main = inv.getItemInMainHand();
+        ItemStack off = inv.getItemInOffHand();
+
+        if (isQualityFood(main, qualityKey)) {
+            if (main.getAmount() > 1) main.setAmount(main.getAmount() - 1);
+            else inv.setItemInMainHand(null);
+            return;
+        }
+        if (isQualityFood(off, qualityKey)) {
+            if (off.getAmount() > 1) off.setAmount(off.getAmount() - 1);
+            else inv.setItemInOffHand(null);
+            return;
+        }
+        for (int i = 0; i < inv.getSize(); i++) {
+            ItemStack s = inv.getItem(i);
+            if (isQualityFood(s, qualityKey)) {
+                if (s.getAmount() > 1) s.setAmount(s.getAmount() - 1);
+                else inv.setItem(i, null);
+                return;
+            }
+        }
+    }
+
+    private boolean isQualityFood(ItemStack item, NamespacedKey qualityKey) {
+        return item != null && item.hasItemMeta()
+            && item.getItemMeta().getPersistentDataContainer().has(qualityKey, PersistentDataType.STRING);
     }
 
     private FoodValues getBaseFoodValues(Material mat) {

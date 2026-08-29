@@ -151,20 +151,40 @@ public class CookingStationManager extends RealizModule implements Listener {
             + meta.getPersistentDataContainer().getOrDefault(hydKey, PersistentDataType.INTEGER, 0) * mult);
         data.addTasteLevel(1);
 
-        if (item.getAmount() > 1) {
-            item.setAmount(item.getAmount() - 1);
-        } else {
-            PlayerInventory inv = player.getInventory();
-            ItemStack main = inv.getItemInMainHand();
-            if (main.isSimilar(item)) {
-                inv.setItemInMainHand(null);
-            } else if (inv.getItemInOffHand().isSimilar(item)) {
-                inv.setItemInOffHand(null);
-            } else {
-                inv.removeItem(item);
-            }
-        }
+        // event.getItem()はコピーの可能性があるため、インベントリから確実に1つ消費する
+        consumeOne(player);
 
         player.sendMessage(ChatColor.GRAY + "美味しい! (味覚経験+1)");
+    }
+
+    private boolean isDishItem(ItemStack item) {
+        return item != null && item.hasItemMeta()
+            && item.getItemMeta().getPersistentDataContainer().has(dishKey, PersistentDataType.BYTE);
+    }
+
+    private void consumeOne(Player player) {
+        PlayerInventory inv = player.getInventory();
+        ItemStack main = inv.getItemInMainHand();
+        ItemStack off = inv.getItemInOffHand();
+
+        if (isDishItem(main)) {
+            if (main.getAmount() > 1) main.setAmount(main.getAmount() - 1);
+            else inv.setItemInMainHand(null);
+            return;
+        }
+        if (isDishItem(off)) {
+            if (off.getAmount() > 1) off.setAmount(off.getAmount() - 1);
+            else inv.setItemInOffHand(null);
+            return;
+        }
+        // 念のため全スロットを走査
+        for (int i = 0; i < inv.getSize(); i++) {
+            ItemStack s = inv.getItem(i);
+            if (isDishItem(s)) {
+                if (s.getAmount() > 1) s.setAmount(s.getAmount() - 1);
+                else inv.setItem(i, null);
+                return;
+            }
+        }
     }
 }
