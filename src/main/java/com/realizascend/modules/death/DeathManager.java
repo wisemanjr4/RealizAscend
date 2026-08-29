@@ -58,7 +58,7 @@ public class DeathManager extends RealizModule implements Listener {
         PlayerData data = plugin.getDataManager().getData(player);
 
         player.setHealth(Math.max(2, player.getMaxHealth() * 0.5));
-        player.setFoodLevel(20);
+        player.setFoodLevel((int) Math.round(data.getNutritionBalance() / 100.0 * 20.0));
         player.setSaturation(0);
 
         data.setHealthLevel(50);

@@ -133,6 +133,18 @@ public class NutritionManager extends RealizModule implements Listener {
         if (foodRegen > 1.0 && player.getHealth() < player.getMaxHealth()) {
             plugin.getRecoveryManager().addHealthRegen(player, 2.0 * (foodRegen - 1.0), 10);
         }
+
+        // バニラ空腹ゲージを栄養状態に合わせて更新 (胃袋の見た目)
+        syncFoodLevel(player, data);
+    }
+
+    // バニラ空腹ゲージ = 胃袋(食べた量)として、栄養バランスに合わせて表示する
+    private void syncFoodLevel(Player player, PlayerData data) {
+        int foodLevel = (int) Math.round(data.getNutritionBalance() / 100.0 * 20.0);
+        foodLevel = Math.max(0, Math.min(20, foodLevel));
+        if (player.getFoodLevel() != foodLevel) {
+            player.setFoodLevel(foodLevel);
+        }
     }
 
     @EventHandler
@@ -484,6 +496,7 @@ public class NutritionManager extends RealizModule implements Listener {
                 data.setHydration(data.getHydration() - hydrationDecay);
 
                 applyNutritionEffects(player, data, cfg);
+                syncFoodLevel(player, data);
                 showNutritionHud(player, data);
             }
         }

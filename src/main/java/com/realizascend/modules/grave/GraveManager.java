@@ -157,17 +157,27 @@ public class GraveManager extends RealizModule implements Listener {
     private Location findPlaceable(Location base) {
         World world = base.getWorld();
         if (world == null) return null;
-        int minY = world.getMinHeight(); // 1.19 では Y=-64 までが実地形
-        if (base.getY() < minY) return null;
-        // 上下6〜-8、周囲2ブロックを探索 (地中でも少し探す)
-        for (int dy = 6; dy >= -8; dy--) {
+        int minY = world.getMinHeight();
+        int bx = base.getBlockX(), by = base.getBlockY(), bz = base.getBlockZ();
+
+        // 死亡地点を中心に「近い順」で空きブロックを探す
+        // (以前は上方向から探索して墓が空中に浮く不具合があった)
+        int[] dyOrder = {0, -1, -2, 1, 2, 3, 4, 5, 6};
+        for (int dy : dyOrder) {
+            int y = by + dy;
+            if (y < minY) continue;
+            // まず死亡地点の真上/真下 (中央列)
+            Material center = world.getBlockAt(bx, y, bz).getType();
+            if (center == Material.AIR || center == Material.WATER || center == Material.LAVA) {
+                return new Location(world, bx, y, bz);
+            }
+            // その高さの周囲を探索
             for (int dx = -2; dx <= 2; dx++) {
                 for (int dz = -2; dz <= 2; dz++) {
-                    Location loc = base.clone().add(dx, dy, dz);
-                    if (loc.getY() < minY) continue;
-                    Material type = loc.getBlock().getType();
+                    if (dx == 0 && dz == 0) continue;
+                    Material type = world.getBlockAt(bx + dx, y, bz + dz).getType();
                     if (type == Material.AIR || type == Material.WATER || type == Material.LAVA) {
-                        return loc;
+                        return new Location(world, bx + dx, y, bz + dz);
                     }
                 }
             }

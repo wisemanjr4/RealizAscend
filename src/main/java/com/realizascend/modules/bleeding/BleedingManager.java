@@ -76,6 +76,11 @@ public class BleedingManager extends RealizModule implements Listener {
     @EventHandler
     public void onDamage(EntityDamageEvent event) {
         if (!(event.getEntity() instanceof Player)) return;
+        // バニラの飢餓ダメージは無効化 (栄養システム側で処理する)
+        if (event.getCause() == EntityDamageEvent.DamageCause.STARVATION) {
+            event.setCancelled(true);
+            return;
+        }
         Player player = (Player) event.getEntity();
         PlayerData data = plugin.getDataManager().getData(player);
         ConfigManager cfg = plugin.getConfigManager();
