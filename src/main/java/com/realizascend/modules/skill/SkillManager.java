@@ -690,8 +690,20 @@ public class SkillManager extends RealizModule implements Listener {
     public void onInventoryClick(InventoryClickEvent event) {
         if (!(event.getWhoClicked() instanceof Player)) return;
         String title = event.getView().getTitle();
-        if (!title.startsWith(ChatColor.DARK_GRAY.toString())) return;
+        // スキルメニュー専用のGUIだけを処理する (墓や調理台など他のDARK_GRAYタイトルを誤操作しない)
+        if (!isSkillMenuTitle(title)) return;
         SkillMenu.handleClick(event, this);
+    }
+
+    private boolean isSkillMenuTitle(String title) {
+        if (SkillMenu.MAIN_TITLE.equals(title)) return true;
+        String stripped = ChatColor.stripColor(title);
+        if (stripped == null) return false;
+        for (String id : SKILL_TREES) {
+            String display = SKILL_TREE_DISPLAY_NAMES.getOrDefault(id, id);
+            if (ChatColor.stripColor(display).equals(stripped)) return true;
+        }
+        return false;
     }
 
     // 石工/木工: 石材・木材クラフト時の素材消費を軽減 (素材を1個返却)

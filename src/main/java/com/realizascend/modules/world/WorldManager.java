@@ -19,7 +19,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.player.PlayerBucketFillEvent;
+import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
@@ -139,20 +139,20 @@ public class WorldManager extends RealizModule implements Listener {
     }
 
     @EventHandler
-    public void onWaterBucketFill(PlayerBucketFillEvent event) {
+    public void onWaterBucketEmpty(PlayerBucketEmptyEvent event) {
         if (!plugin.getConfigManager().worldDisableWaterSource) return;
+        if (event.getBucket() != Material.WATER_BUCKET) return;
 
-        Block block = event.getBlockClicked();
-        if (block == null) return;
-
-        if (block.getType() == Material.WATER) {
-            if (block.getBlockData() instanceof Levelled) {
-                Levelled levelled = (Levelled) block.getBlockData();
-                if (levelled.getLevel() == 0) {
-                    event.setCancelled(true);
-                }
-            }
-        }
+        // 置いた水は「水流」(level>0) にする → 水源の無限生成を防ぐ
+        // (汲み取りは許可: 自然水源からは自由に水を得られる)
+        Location loc = event.getBlockClicked().getRelative(event.getBlockFace()).getLocation();
+        Bukkit.getScheduler().runTask(plugin, () -> {
+            if (loc.getWorld() == null) return;
+            if (loc.getBlock().getType() != Material.WATER) return;
+            Levelled flowing = (Levelled) Material.WATER.createBlockData();
+            flowing.setLevel(1);
+            loc.getBlock().setBlockData(flowing, false);
+        });
     }
 
     @EventHandler
