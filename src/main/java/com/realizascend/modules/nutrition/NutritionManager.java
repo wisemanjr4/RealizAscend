@@ -191,13 +191,20 @@ public class NutritionManager extends RealizModule implements Listener {
         if (!(item.getItemMeta() instanceof PotionMeta)) return;
         PotionMeta meta = (PotionMeta) item.getItemMeta();
         PotionData potionData = meta.getBasePotionData();
-        if (potionData == null || potionData.getType() != PotionType.WATER) return;
+        if (potionData == null) return;
 
-        boolean isRaw = meta.getPersistentDataContainer().has(rawWaterNamespacedKey, PersistentDataType.BYTE);
-        double hydGain = isRaw ? 20.0 : 40.0;
+        // 水ポーションは多め、それ以外のポーションも飲めば水分が少し回復する
+        boolean isRaw = false;
+        double hydGain = 15.0;
+        if (potionData.getType() == PotionType.WATER) {
+            isRaw = meta.getPersistentDataContainer().has(rawWaterNamespacedKey, PersistentDataType.BYTE);
+            hydGain = isRaw ? 20.0 : 40.0;
+        }
         data.setHydration(data.getHydration() + hydGain);
 
-        String msg = ChatColor.AQUA + "水分 " + (isRaw ? "+20 (生水 - 感染リスク!)" : "+40");
+        String msg = potionData.getType() == PotionType.WATER
+            ? ChatColor.AQUA + "水分 " + (isRaw ? "+20 (生水 - 感染リスク!)" : "+40")
+            : ChatColor.AQUA + "水分 +15 (ポーション)";
         MessageUtil.sendActionBar(player, msg);
 
         if (isRaw && Math.random() < 0.2 * plugin.getSkillManager().getAbilityEffectValue(player, "DISEASE_CHANCE")) {
