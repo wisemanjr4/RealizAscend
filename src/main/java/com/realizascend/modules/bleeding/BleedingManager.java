@@ -337,9 +337,11 @@ public class BleedingManager extends RealizModule implements Listener {
                 if (data.isInfected()) {
                     double infectionSpeed = plugin.getSkillManager().getAbilityEffectValue(player, "INFECTION_SPEED");
                     data.setInfectionProgress(Math.min(100.0, data.getInfectionProgress() + 0.5 * infectionSpeed));
-                    // 感染症対処Ⅱ: 自然治癒の確率
+                    // 自然治癒: 感染症対処Ⅱスキル、または十分に栄養と水分が満ちていれば体が抗う
                     double naturalCure = plugin.getSkillManager().getAbilityEffectValue(player, "INFECTION_NATURAL_CURE");
-                    if (naturalCure > 1.0 && random.nextDouble() < naturalCure - 1.0) {
+                    boolean wellNourished = data.getNutritionBalance() > 60 && data.getHydration() > 60;
+                    if ((naturalCure > 1.0 && random.nextDouble() < naturalCure - 1.0)
+                        || (wellNourished && random.nextDouble() < 0.08)) {
                         data.setInfectionProgress(Math.max(0, data.getInfectionProgress() - 10.0));
                         if (data.getInfectionProgress() <= 0) {
                             data.setInfected(false);
@@ -354,10 +356,10 @@ public class BleedingManager extends RealizModule implements Listener {
                         }
                         player.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 220, 0, false, false, true));
                         player.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 120, 0, false, false, true));
-                        // 直接ダメージは3秒に1回に抑え、治療の猶予を与える
+                        // 直接ダメージは5秒に1回の軽いものに抑え、治療の猶予を与える (詰み防止)
                         damageCounter++;
-                        if (damageCounter % 3 == 0) {
-                            player.damage(1.0);
+                        if (damageCounter % 5 == 0) {
+                            player.damage(0.5);
                         }
                     } else {
                         // 治療で重症化を脱したら再度警告できるようにする

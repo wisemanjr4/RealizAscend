@@ -71,6 +71,14 @@ public class DeathManager extends RealizModule implements Listener {
         data.setStamina(50);
         data.setFatigue(40);
 
+        // 死んでリスポーンすれば体はリセットされる (感染の詰み防止)
+        data.setInfected(false);
+        data.setInfectionProgress(0);
+        data.setHeadInjured(false);
+        data.setTorsoInjured(false);
+        data.setLegsInjured(false);
+        data.setFractured(false);
+
         Map<String, Integer> skillLevels = data.getSkillLevels();
         Map<String, Integer> newSkillLevels = new HashMap<>();
         for (Map.Entry<String, Integer> entry : skillLevels.entrySet()) {
