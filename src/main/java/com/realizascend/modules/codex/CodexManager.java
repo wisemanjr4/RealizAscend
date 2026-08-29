@@ -44,43 +44,71 @@ public class CodexManager extends RealizModule implements Listener {
         entryDescriptions.put("dehydration", "水は命。水分が尽きると体は機能しない。安全な水源を探そう。ただし生水は感染リスクがある。煮沸するか浄化しよう。");
         entryDescriptions.put("bleeding", "血液が減っている。包帯(紙+糸)で止血しよう。深い傷は縫合が必要なことも。手当てしないと感染する恐れがある。");
         entryDescriptions.put("first_kill", "初めて敵性生物を倒した。戦闘スキルは経験で向上する。武器によってリーチやダメージ特性が異なる。戦闘中のスタミナ管理を忘れずに。");
-        entryDescriptions.put("stress_management", "ストレスが高まっている。下げるには、明るい場所に居る・焚き火やかまどのそばで休む・栄養バランスと水分を保つ・よく眠る・酒を飲む。暗い場所や敵のそば、極端な温度はストレスを上げる。");
+        entryDescriptions.put("stress_management", "心が休まらない。どうやらストレスが溜まっているようだ。明るい所で過ごし、火のそばで休み、満ち足りた状態を保ち、よく眠ると楽になる。暗い所や敵の気配、厳しい寒暑、痛みや寝不足が続くと悪化する。酒を飲めば一時的に楽になるが、喉は渇きやすくなる。");
     }
 
     // 常時閲覧できる生存知識ページ (経験で解放されるエントリとは別)
     private static final List<String> REFERENCE_PAGES = new ArrayList<>();
 
     static {
-        REFERENCE_PAGES.add(ChatColor.GOLD + "" + ChatColor.BOLD + "生存知識: ストレス\n\n"
+        REFERENCE_PAGES.add(ChatColor.GOLD + "" + ChatColor.BOLD + "心の持ちよう\n\n"
             + ChatColor.RESET + ChatColor.GRAY
-            + "ストレスは暗い場所・敵のそば・極端な温度・睡眠不足・負傷で上がる。\n\n"
-            + "下げるには:\n・明るい場所に居る\n・焚き火やかまどのそばで休む\n・栄養バランスと水分を保つ\n・よく眠る\n・酒を飲む");
-        REFERENCE_PAGES.add(ChatColor.GOLD + "" + ChatColor.BOLD + "生存知識: 体温\n\n"
+            + "心が休まらない時は、\n"
+            + "明るい所で過ごすと落ち着く。\n"
+            + "焚き火のそばに居ると\n"
+            + "心が温まる気がする。\n\n"
+            + "満ち足りていれば平気だし、\n"
+            + "ぐっすり眠れば元に戻る。\n"
+            + "酒を飲めば少し楽になるが、\n"
+            + "喉は渇きやすくなる。\n\n"
+            + "暗い所や物音、極端な寒暑、\n"
+            + "痛みや眠れない夜が続くと\n"
+            + "心がすり減っていく。");
+        REFERENCE_PAGES.add(ChatColor.GOLD + "" + ChatColor.BOLD + "寒さと暑さ\n\n"
             + ChatColor.RESET + ChatColor.GRAY
-            + "寒い時は焚き火のそばや屋内で過ごし、熱い料理を食べる。\n"
-            + "暑い時は日陰に入り、通気の良い装備に着替え、冷たい物を食べる。\n\n"
-            + "防具には保温値と遮熱値があり、砂漠で重装備は逆効果。\n"
-            + "体温が危険域に達するとHPが減る。");
-        REFERENCE_PAGES.add(ChatColor.GOLD + "" + ChatColor.BOLD + "生存知識: 栄養と水分\n\n"
+            + "寒いと感じたら、火のそばで\n"
+            + "温まるか、温かい物を食べると\n"
+            + "体が温まる。\n\n"
+            + "暑い日は水を多めに飲み、\n"
+            + "涼しい所で休むと楽だ。\n\n"
+            + "着る物の素材や重さで、\n"
+            + "暑さ寒さの感じ方が変わる。\n"
+            + "砂漠で重装備は身を滅ぼす。\n\n"
+            + "震えが止まらない、\n"
+            + "息が苦しいほどなら\n"
+            + "命に関わることもある。");
+        REFERENCE_PAGES.add(ChatColor.GOLD + "" + ChatColor.BOLD + "腹ごしらえ\n\n"
             + ChatColor.RESET + ChatColor.GRAY
-            + "カロリー・タンパク質・ビタミン・塩分をバランス良く摂ろう。\n"
-            + "・生水は煮沸するかフィルターで浄化\n"
-            + "・生肉は食中毒の恐れがある\n"
-            + "・燻製・塩漬け・乾燥は保存が利く\n"
-            + "・塩分過多は喉が渇きやすくなる");
-        REFERENCE_PAGES.add(ChatColor.GOLD + "" + ChatColor.BOLD + "生存知識: 負傷と感染\n\n"
+            + "腹が減ると力が出ない。\n"
+            + "肉・野菜・塩気を\n"
+            + "バランスよく食べるのが\n"
+            + "体には一番いい気がする。\n\n"
+            + "生の水はそのまま飲むと\n"
+            + "腹を壊すことがある。\n"
+            + "沸かすか、ろ過すれば安心だ。\n\n"
+            + "生の肉も危ない。火を通そう。\n"
+            + "燻製や塩漬けは長持ちする。");
+        REFERENCE_PAGES.add(ChatColor.GOLD + "" + ChatColor.BOLD + "傷の手当て\n\n"
             + ChatColor.RESET + ChatColor.GRAY
-            + "負傷は放置すると危険。適切に手当てしよう。\n"
-            + "・出血・負傷 → 包帯(紙+糸)\n"
-            + "・骨折 → 添え木(棒+糸)\n"
-            + "・感染 → 消毒液(瓶+砂糖+木炭) 抗生物質(瓶+砂糖+赤キノコ)\n"
-            + "・負傷したまま水や土に触れると感染しやすい");
-        REFERENCE_PAGES.add(ChatColor.GOLD + "" + ChatColor.BOLD + "生存知識: 疲労・睡眠・重量\n\n"
+            + "傷は放っておくと悪くなる。\n"
+            + "血が出たら布で巻き、\n"
+            + "骨が折れたら棒で固定する。\n"
+            + "傷が化膿して熱を持つようなら、\n"
+            + "薬で治すしかない。\n\n"
+            + "汚れた水や土に触れた傷は\n"
+            + "特に治りにくい。\n"
+            + "早めに手当てした方が\n"
+            + "結局は楽だ。");
+        REFERENCE_PAGES.add(ChatColor.GOLD + "" + ChatColor.BOLD + "休み方と荷物\n\n"
             + ChatColor.RESET + ChatColor.GRAY
-            + "疲労が貯まると眠くなる。疲労が30以上で睡眠可能。\n"
-            + "眠ると疲労が回復し、健康度も少し戻る。\n\n"
-            + "重量に注意: オーバーで鈍足、重度オーバーでジャンプ不可。\n"
-            + "スキルの筋力や工具で上限を上げられる。");
+            + "眠くなったら寝るのが\n"
+            + "一番いい。\n"
+            + "ぐっすり眠れば疲れも取れて、\n"
+            + "体も元に戻る。\n\n"
+            + "荷物を運びすぎると\n"
+            + "動きが鈍くなる。\n"
+            + "重すぎると跳べなくなる。\n"
+            + "身軽な方が長く生きられる。");
     }
 
     private final Set<UUID> hasDiedBefore = new HashSet<>();
