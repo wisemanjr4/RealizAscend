@@ -155,14 +155,16 @@ public class GraveManager extends RealizModule implements Listener {
     }
 
     private Location findPlaceable(Location base) {
-        if (base.getWorld() == null) return null;
-        if (base.getY() < 1) return null;
+        World world = base.getWorld();
+        if (world == null) return null;
+        int minY = world.getMinHeight(); // 1.19 では Y=-64 までが実地形
+        if (base.getY() < minY) return null;
         // 上下6〜-8、周囲2ブロックを探索 (地中でも少し探す)
         for (int dy = 6; dy >= -8; dy--) {
             for (int dx = -2; dx <= 2; dx++) {
                 for (int dz = -2; dz <= 2; dz++) {
                     Location loc = base.clone().add(dx, dy, dz);
-                    if (loc.getY() < 1) continue;
+                    if (loc.getY() < minY) continue;
                     Material type = loc.getBlock().getType();
                     if (type == Material.AIR || type == Material.WATER || type == Material.LAVA) {
                         return loc;
