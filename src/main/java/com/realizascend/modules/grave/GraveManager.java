@@ -128,7 +128,11 @@ public class GraveManager extends RealizModule implements Listener {
         Bukkit.getScheduler().runTask(plugin, () -> {
             if (deathLoc.getWorld() == null) return;
             Location stone = findPlaceable(deathLoc);
-            if (stone == null) return;
+            if (stone == null) {
+                // 地中圧死など墓を置く場所がない場合は、アイテムをその場に落として消失を防ぐ
+                dropItemsAt(deathLoc, mainContents, armorContents, offhand);
+                return;
+            }
 
             stone.getBlock().setType(Material.SMOOTH_STONE, false);
             Location headLoc = stone.clone().add(0, 1, 0);
@@ -152,10 +156,13 @@ public class GraveManager extends RealizModule implements Listener {
 
     private Location findPlaceable(Location base) {
         if (base.getWorld() == null) return null;
-        for (int dx = 0; dx <= 2; dx++) {
-            for (int dz = 0; dz <= 2; dz++) {
-                for (int dy = 0; dy >= -2; dy--) {
+        if (base.getY() < 1) return null;
+        // 上下6〜-8、周囲2ブロックを探索 (地中でも少し探す)
+        for (int dy = 6; dy >= -8; dy--) {
+            for (int dx = -2; dx <= 2; dx++) {
+                for (int dz = -2; dz <= 2; dz++) {
                     Location loc = base.clone().add(dx, dy, dz);
+                    if (loc.getY() < 1) continue;
                     Material type = loc.getBlock().getType();
                     if (type == Material.AIR || type == Material.WATER || type == Material.LAVA) {
                         return loc;
@@ -164,6 +171,25 @@ public class GraveManager extends RealizModule implements Listener {
             }
         }
         return null;
+    }
+
+    private void dropItemsAt(Location loc, ItemStack[] main, ItemStack[] armor, ItemStack offhand) {
+        World world = loc.getWorld();
+        if (world == null) return;
+        Location dropAt = loc.clone().add(0.5, 0.5, 0.5);
+        for (ItemStack item : main) {
+            if (item != null && item.getType() != Material.AIR) {
+                world.dropItemNaturally(dropAt, item);
+            }
+        }
+        for (ItemStack item : armor) {
+            if (item != null && item.getType() != Material.AIR) {
+                world.dropItemNaturally(dropAt, item);
+            }
+        }
+        if (offhand != null && offhand.getType() != Material.AIR) {
+            world.dropItemNaturally(dropAt, offhand);
+        }
     }
 
     @EventHandler
