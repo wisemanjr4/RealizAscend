@@ -65,6 +65,8 @@ public class ConfigManager {
     public boolean hudEnabled;
     public int hudUpdateInterval;
 
+    public int statusFlavorInterval;
+
     public ConfigManager(RealizAscend plugin) {
         this.plugin = plugin;
         loadConfig();
@@ -134,5 +136,7 @@ public class ConfigManager {
 
         hudEnabled = config.getBoolean("hud.enabled", true);
         hudUpdateInterval = config.getInt("hud.update-interval", 20);
+
+        statusFlavorInterval = config.getInt("status.flavor-interval", 1200);
     }
 }

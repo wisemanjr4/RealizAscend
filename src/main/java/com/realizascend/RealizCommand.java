@@ -23,6 +23,7 @@ public class RealizCommand implements CommandExecutor {
             sender.sendMessage(ChatColor.YELLOW + "/realiz info " + ChatColor.GRAY + "- プラグイン情報");
             sender.sendMessage(ChatColor.YELLOW + "/realiz codex " + ChatColor.GRAY + "- コーデックスを開く");
             sender.sendMessage(ChatColor.YELLOW + "/realiz skill " + ChatColor.GRAY + "- スキルメニューを開く");
+            sender.sendMessage(ChatColor.YELLOW + "/realiz status " + ChatColor.GRAY + "- 現在の異常状態を確認");
             sender.sendMessage(ChatColor.YELLOW + "/realiz reset <player> " + ChatColor.GRAY + "- プレイヤーデータをリセット");
             return true;
         }
@@ -58,6 +59,23 @@ public class RealizCommand implements CommandExecutor {
             case "codex":
                 if (sender instanceof Player) {
                     plugin.getCodexManager().openCodex((Player) sender);
+                }
+                break;
+
+            case "status":
+                if (sender instanceof Player) {
+                    Player player = (Player) sender;
+                    java.util.List<String> conditions = plugin.getStatusManager().getActiveConditions(player);
+                    player.sendMessage(ChatColor.GOLD + "" + ChatColor.BOLD + "=== 現在の状態 ===");
+                    if (conditions.isEmpty()) {
+                        player.sendMessage(ChatColor.GREEN + "特に異常なし。元気だ。");
+                    } else {
+                        for (String condition : conditions) {
+                            String reason = plugin.getStatusManager().getReason(condition);
+                            player.sendMessage(ChatColor.YELLOW + condition
+                                + (reason.isEmpty() ? "" : ChatColor.GRAY + " (" + reason + ")"));
+                        }
+                    }
                 }
                 break;
 

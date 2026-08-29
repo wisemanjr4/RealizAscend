@@ -88,3 +88,7 @@ skills:
 hud:
   enabled: true
   update-interval: 20
+
+# Status / flavor text settings
+status:
+  flavor-interval: 1200

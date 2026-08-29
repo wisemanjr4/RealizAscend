@@ -26,6 +26,7 @@ import com.realizascend.modules.trap.TrapManager;
 import com.realizascend.modules.farm.FarmingManager;
 import com.realizascend.modules.cookingstation.CookingStationManager;
 import com.realizascend.modules.stealth.StealthManager;
+import com.realizascend.modules.status.StatusManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class RealizAscend extends JavaPlugin {
@@ -56,6 +57,7 @@ public final class RealizAscend extends JavaPlugin {
     private ToolManager toolManager;
     private FoodManager foodManager;
     private TrapManager trapManager;
+    private StatusManager statusManager;
     private FarmingManager farmingManager;
     private CookingStationManager cookingStationManager;
     private StealthManager stealthManager;
@@ -89,6 +91,7 @@ public final class RealizAscend extends JavaPlugin {
         toolManager = new ToolManager(this);
         foodManager = new FoodManager(this);
         trapManager = new TrapManager(this);
+        statusManager = new StatusManager(this);
         farmingManager = new FarmingManager(this);
         cookingStationManager = new CookingStationManager(this);
         stealthManager = new StealthManager(this);
@@ -116,7 +119,8 @@ public final class RealizAscend extends JavaPlugin {
             trapManager,
             farmingManager,
             cookingStationManager,
-            stealthManager
+            stealthManager,
+            statusManager
         );
 
         moduleManager.enableAll();
@@ -171,4 +175,5 @@ public final class RealizAscend extends JavaPlugin {
     public FarmingManager getFarmingManager() { return farmingManager; }
     public CookingStationManager getCookingStationManager() { return cookingStationManager; }
     public StealthManager getStealthManager() { return stealthManager; }
+    public StatusManager getStatusManager() { return statusManager; }
 }
