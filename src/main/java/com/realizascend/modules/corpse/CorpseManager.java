@@ -110,32 +110,42 @@ public class CorpseManager extends RealizModule implements Listener {
     @EventHandler(priority = EventPriority.HIGH)
     public void onPlayerDeath(PlayerDeathEvent event) {
         Player player = event.getEntity();
-        Location deathLoc = player.getLocation();
+        Location deathLoc = player.getLocation().clone();
+        final UUID playerUuid = player.getUniqueId();
+        final String playerName = player.getName();
 
         ItemStack[] drops = event.getDrops().toArray(new ItemStack[0]);
         event.getDrops().clear();
 
-        ItemStack head = new ItemStack(Material.PLAYER_HEAD);
-        SkullMeta skullMeta = (SkullMeta) head.getItemMeta();
-        if (skullMeta != null) {
-            skullMeta.setOwningPlayer(player);
-            head.setItemMeta(skullMeta);
-        }
+        // 死体のスポーンは次のティックに遅延する。
+        // 死亡イベント(ダメージ処理中)にエンティティを生成すると、
+        // Paperのメインスレッドがハング/ロックする原因になるため。
+        Bukkit.getScheduler().runTask(plugin, () -> {
+            if (deathLoc.getWorld() == null) return;
 
-        ArmorStand stand = player.getWorld().spawn(deathLoc, ArmorStand.class);
-        stand.setVisible(true);
-        stand.setCustomName(ChatColor.RED + player.getName() + "の死体");
-        stand.setCustomNameVisible(true);
-        stand.setInvulnerable(true);
-        stand.setGravity(false);
-        stand.setBasePlate(false);
-        stand.setArms(true);
-        stand.getEquipment().setHelmet(head);
+            ItemStack head = new ItemStack(Material.PLAYER_HEAD);
+            SkullMeta skullMeta = (SkullMeta) head.getItemMeta();
+            if (skullMeta != null) {
+                skullMeta.setOwningPlayer(Bukkit.getOfflinePlayer(playerUuid));
+                head.setItemMeta(skullMeta);
+            }
 
-        corpses.computeIfAbsent(player.getUniqueId(), k -> new ArrayList<>()).add(new CorpseData(
-            stand.getUniqueId(), deathLoc, drops,
-            System.currentTimeMillis(), player.getUniqueId(), player.getName()
-        ));
+            ArmorStand stand = deathLoc.getWorld().spawn(deathLoc, ArmorStand.class);
+            if (stand == null) return;
+            stand.setVisible(true);
+            stand.setCustomName(ChatColor.RED + playerName + "の死体");
+            stand.setCustomNameVisible(true);
+            stand.setInvulnerable(true);
+            stand.setGravity(false);
+            stand.setBasePlate(false);
+            stand.setArms(true);
+            stand.getEquipment().setHelmet(head);
+
+            corpses.computeIfAbsent(playerUuid, k -> new ArrayList<>()).add(new CorpseData(
+                stand.getUniqueId(), deathLoc, drops,
+                System.currentTimeMillis(), playerUuid, playerName
+            ));
+        });
     }
 
     @EventHandler

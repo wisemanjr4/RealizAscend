@@ -128,6 +128,8 @@ public class BleedingManager extends RealizModule implements Listener {
                 player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 200, 2, false, false, true));
                 return;
             }
+            // 失血死: ダメージイベントの二重処理を防ぐため元ダメージを0にしてから死亡させる
+            event.setDamage(0);
             player.setHealth(0);
             return;
         }
