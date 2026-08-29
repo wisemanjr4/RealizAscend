@@ -22,8 +22,8 @@ public class WeightManager extends RealizModule {
     private BukkitRunnable updateTask;
     private final Map<UUID, String> lastZone = new java.util.HashMap<>();
 
-    private static final double DEFAULT_WEIGHT = 10.0;
-    private static final double ARMOR_WEIGHT = 30.0;
+    private static final double DEFAULT_WEIGHT = 8.0;
+    private static final double ARMOR_WEIGHT = 20.0;
     private static final double EQUIPPED_ARMOR_MULTIPLIER = 0.5;
 
     public WeightManager(RealizAscend plugin) {
@@ -41,7 +41,7 @@ public class WeightManager extends RealizModule {
             Material.OBSIDIAN, Material.SOUL_SAND, Material.SOUL_SOIL
         };
         for (Material mat : heavyMaterials) {
-            weightFactors.put(mat, 20.0);
+            weightFactors.put(mat, 12.0);
         }
 
         Material[] ingotMaterials = {
@@ -49,7 +49,7 @@ public class WeightManager extends RealizModule {
             Material.COPPER_INGOT
         };
         for (Material mat : ingotMaterials) {
-            weightFactors.put(mat, 10.0);
+            weightFactors.put(mat, 8.0);
         }
 
         weightFactors.put(Material.DIAMOND, 1.0);
@@ -80,7 +80,7 @@ public class WeightManager extends RealizModule {
             Material.CRIMSON_PLANKS,             Material.WARPED_PLANKS
         };
         for (Material mat : woodMaterials) {
-            weightFactors.put(mat, 8.0);
+            weightFactors.put(mat, 6.0);
         }
 
         Material[] rawOreMaterials = {
@@ -88,11 +88,11 @@ public class WeightManager extends RealizModule {
             Material.RAW_IRON_BLOCK, Material.RAW_GOLD_BLOCK, Material.RAW_COPPER_BLOCK
         };
         for (Material mat : rawOreMaterials) {
-            weightFactors.put(mat, 25.0);
+            weightFactors.put(mat, 15.0);
         }
 
-        weightFactors.put(Material.WATER_BUCKET, 30.0);
-        weightFactors.put(Material.LAVA_BUCKET, 30.0);
+        weightFactors.put(Material.WATER_BUCKET, 20.0);
+        weightFactors.put(Material.LAVA_BUCKET, 20.0);
     }
 
     private boolean isTool(Material mat) {
@@ -128,7 +128,7 @@ public class WeightManager extends RealizModule {
         }
 
         if (isTool(mat)) {
-            return 15.0 * item.getAmount();
+            return 10.0 * item.getAmount();
         }
         if (isArmor(mat)) {
             return ARMOR_WEIGHT * item.getAmount();

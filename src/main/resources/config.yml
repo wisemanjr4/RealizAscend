@@ -53,8 +53,8 @@ stress:
 
 # Weight settings
 weight:
-  normal-limit: 1000.0
-  over-limit: 1500.0
+  normal-limit: 3000.0
+  over-limit: 4500.0
 
 # Torch settings
 torch:
