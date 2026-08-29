@@ -26,10 +26,12 @@ public class BreweryListener implements Listener {
         int alcohol = event.getAddedAlcohol();
         int quality = event.getQuality();
 
-        double stressReduction = alcohol * 0.2 + quality * 0.1;
+        // 酒はストレスを大きく下げる (アルコール度数が高いほど効く)
+        double stressReduction = alcohol * 2.0 + quality * 0.5;
         data.setStress(Math.max(0, data.getStress() - stressReduction));
 
-        double hydrationLoss = 5.0 + alcohol * 0.3;
+        // 飲み過ぎると喉が渇く (水分低下もそれなりに)
+        double hydrationLoss = 6.0 + alcohol * 0.5;
         data.setHydration(Math.max(0, data.getHydration() - hydrationLoss));
 
         player.sendMessage(ChatColor.LIGHT_PURPLE + "ストレス " + String.format("%.0f", -stressReduction)
