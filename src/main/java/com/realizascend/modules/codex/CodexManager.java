@@ -105,6 +105,13 @@ public class CodexManager extends RealizModule implements Listener {
             + "燻製や塩漬けは長持ちする。");
         REFERENCE_PAGES.add(ChatColor.GOLD + "" + ChatColor.BOLD + "傷の手当て\n\n"
             + ChatColor.RESET + ChatColor.GRAY
+            + "受けた傷の場所によって\n"
+            + "具合が変わる。\n"
+            + "頭をやられれば目まいがし、\n"
+            + "胴をやられれば内側から\n"
+            + "血が出る気がする。\n"
+            + "脚をやられれば動けなくなり、\n"
+            + "ひどい時は骨まで折れる。\n\n"
             + "血が出たら、紙と糸で\n"
             + "巻くと止血になる。\n"
             + "骨が折れたら、棒と糸で\n"
@@ -113,9 +120,7 @@ public class CodexManager extends RealizModule implements Listener {
             + "瓶と砂糖に何かを混ぜて\n"
             + "薬らしきものを作れそうだ。\n"
             + "炭を混ぜれば消毒に、\n"
-            + "赤い茸ならもっと強い薬に。\n\n"
-            + "汚れた水や土に触れた傷は\n"
-            + "特に治りにくい。");
+            + "赤い茸ならもっと強い薬に。");
         REFERENCE_PAGES.add(ChatColor.GOLD + "" + ChatColor.BOLD + "休み方と荷物\n\n"
             + ChatColor.RESET + ChatColor.GRAY
             + "眠くなったら寝るのが\n"
