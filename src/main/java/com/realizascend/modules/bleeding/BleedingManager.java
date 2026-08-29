@@ -48,6 +48,7 @@ public class BleedingManager extends RealizModule implements Listener {
     private final Random random = new Random();
     private final Map<UUID, Long> injuryTimestamps = new HashMap<>();
     private final Map<UUID, Long> counterReady = new HashMap<>();
+    private final Map<UUID, Boolean> criticalInfectionWarned = new HashMap<>();
     private BukkitTask regenTask;
     private BukkitTask healTask;
 
@@ -68,6 +69,7 @@ public class BleedingManager extends RealizModule implements Listener {
         if (healTask != null) { healTask.cancel(); healTask = null; }
         injuryTimestamps.clear();
         counterReady.clear();
+        criticalInfectionWarned.clear();
         HandlerList.unregisterAll(this);
     }
 
@@ -305,6 +307,8 @@ public class BleedingManager extends RealizModule implements Listener {
     }
 
     private class RegenRunnable extends BukkitRunnable {
+        private int damageCounter = 0;
+
         @Override
         public void run() {
             ConfigManager cfg = plugin.getConfigManager();
@@ -327,7 +331,7 @@ public class BleedingManager extends RealizModule implements Listener {
 
                 if (data.isInfected()) {
                     double infectionSpeed = plugin.getSkillManager().getAbilityEffectValue(player, "INFECTION_SPEED");
-                    data.setInfectionProgress(data.getInfectionProgress() + 0.5 * infectionSpeed);
+                    data.setInfectionProgress(Math.min(100.0, data.getInfectionProgress() + 0.5 * infectionSpeed));
                     // 感染症対処Ⅱ: 自然治癒の確率
                     double naturalCure = plugin.getSkillManager().getAbilityEffectValue(player, "INFECTION_NATURAL_CURE");
                     if (naturalCure > 1.0 && random.nextDouble() < naturalCure - 1.0) {
@@ -338,9 +342,21 @@ public class BleedingManager extends RealizModule implements Listener {
                         }
                     }
                     if (data.getInfectionProgress() >= 100.0) {
-                        player.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 200, 0, false, false, true));
-                        player.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 100, 0, false, false, true));
-                        player.damage(1.0);
+                        // 重症化: 症状は治療まで続くが、警告は1回だけ
+                        if (!criticalInfectionWarned.getOrDefault(player.getUniqueId(), false)) {
+                            criticalInfectionWarned.put(player.getUniqueId(), true);
+                            player.sendMessage(ChatColor.DARK_RED + "感染症が重症化した! 抗生物質や消毒液で治療しないと命に関わる!");
+                        }
+                        player.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 220, 0, false, false, true));
+                        player.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 120, 0, false, false, true));
+                        // 直接ダメージは3秒に1回に抑え、治療の猶予を与える
+                        damageCounter++;
+                        if (damageCounter % 3 == 0) {
+                            player.damage(1.0);
+                        }
+                    } else {
+                        // 治療で重症化を脱したら再度警告できるようにする
+                        criticalInfectionWarned.put(player.getUniqueId(), false);
                     }
                 }
 
