@@ -416,9 +416,11 @@ public class NutritionManager extends RealizModule implements Listener {
             case MELON_SLICE:
             case APPLE:
             case GOLDEN_APPLE:
-            case SWEET_BERRIES:
             case GLOW_BERRIES:
                 return new FoodValues(5, 1, 10, 0, 15);
+            case SWEET_BERRIES:
+                // ベリーはそこまで水分が多くない
+                return new FoodValues(4, 1, 8, 0, 5);
             case CARROT:
             case POTATO:
             case BEETROOT:
