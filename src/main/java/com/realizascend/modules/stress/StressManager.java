@@ -50,8 +50,8 @@ public class StressManager extends RealizModule implements Listener {
             ConfigManager cfg = plugin.getConfigManager();
             for (Player player : Bukkit.getOnlinePlayers()) {
                 PlayerData data = plugin.getDataManager().getData(player);
-                // 危険がなければ常時ゆるやかに落ち着いていく (ストレス100から抜け出せない詰み防止)
-                double delta = -1.5;
+                // 常時低下は撤廃。ストレスは「快適な環境」(明るさ・火・栄養・睡眠・酒)で下がる
+                double delta = 0;
 
                 delta += evaluateDarkness(player);
                 delta += evaluateNearbyMobs(player);
@@ -153,7 +153,7 @@ public class StressManager extends RealizModule implements Listener {
                     if (block == Material.CAMPFIRE || block == Material.SOUL_CAMPFIRE
                         || block == Material.FURNACE || block == Material.BLAST_FURNACE
                         || block == Material.SMOKER) {
-                        return -3.0;
+                        return -2.0;
                     }
                 }
             }
