@@ -176,6 +176,7 @@ public class NutritionManager extends RealizModule implements Listener {
         ItemStack waterBottle = new ItemStack(Material.POTION);
         PotionMeta meta = (PotionMeta) waterBottle.getItemMeta();
         meta.setBasePotionData(new PotionData(PotionType.WATER));
+        meta.setDisplayName(ChatColor.AQUA + "汚染水");
         meta.getPersistentDataContainer().set(rawWaterNamespacedKey, PersistentDataType.BYTE, (byte) 1);
         waterBottle.setItemMeta(meta);
 
@@ -184,7 +185,39 @@ public class NutritionManager extends RealizModule implements Listener {
             player.getWorld().dropItemNaturally(player.getLocation(), drop);
         }
 
-        MessageUtil.sendActionBar(player, ChatColor.AQUA + "+1 生水ボトル (安全のため煮沸しよう)");
+        MessageUtil.sendActionBar(player, ChatColor.AQUA + "+1 汚染水ボトル (煮沸か浄化が必要)");
+    }
+
+    // 水の中でシフト右クリック (手が空) でその場の水を直接飲める
+    @EventHandler(priority = EventPriority.LOW)
+    public void onDirectDrink(PlayerInteractEvent event) {
+        if (event.getAction() != Action.RIGHT_CLICK_AIR && event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
+        Player player = event.getPlayer();
+        if (!player.isSneaking() || !player.isInWater()) return;
+
+        // 手に何か持っていれば直接飲まない (瓶での汲み取りや設置を優先)
+        ItemStack main = player.getInventory().getItemInMainHand();
+        if (main != null && main.getType() != Material.AIR) return;
+
+        if (event.getAction() == Action.RIGHT_CLICK_BLOCK
+            && event.getClickedBlock() != null
+            && event.getClickedBlock().getType() != Material.WATER) {
+            return;
+        }
+
+        event.setCancelled(true);
+        PlayerData data = plugin.getDataManager().getData(player);
+        data.setHydration(data.getHydration() + 20.0);
+
+        double diseaseChance = plugin.getSkillManager().getAbilityEffectValue(player, "DISEASE_CHANCE");
+        if (Math.random() < 0.3 * diseaseChance) {
+            player.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 200, 0));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.HUNGER, 200, 0));
+            player.sendMessage(ChatColor.YELLOW + "水をそのまま飲んで腹を壊した...沸かすべきだった。");
+        } else {
+            player.sendMessage(ChatColor.AQUA + "水を直接飲んで喉を潤した。(汚染の恐れあり)");
+        }
+        MessageUtil.sendActionBar(player, ChatColor.AQUA + "水分 +20 (直接飲んだ)");
     }
 
     private void handlePotionConsume(Player player, PlayerData data, ItemStack item) {
@@ -203,13 +236,23 @@ public class NutritionManager extends RealizModule implements Listener {
         data.setHydration(data.getHydration() + hydGain);
 
         String msg = potionData.getType() == PotionType.WATER
-            ? ChatColor.AQUA + "水分 " + (isRaw ? "+20 (生水 - 感染リスク!)" : "+40")
+            ? ChatColor.AQUA + "水分 " + (isRaw ? "+20 (汚染水 - 腹を壊すかも!)" : "+40")
             : ChatColor.AQUA + "水分 +15 (ポーション)";
         MessageUtil.sendActionBar(player, msg);
 
-        if (isRaw && Math.random() < 0.2 * plugin.getSkillManager().getAbilityEffectValue(player, "DISEASE_CHANCE")) {
-            data.setInfected(true);
-            player.sendMessage(ChatColor.RED + "生水を飲んで気分が悪くなった...");
+        if (isRaw) {
+            double diseaseChance = plugin.getSkillManager().getAbilityEffectValue(player, "DISEASE_CHANCE");
+            // 汚染水は確率で腹を壊す
+            if (Math.random() < 0.35 * diseaseChance) {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 200, 0));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.HUNGER, 200, 0));
+                player.sendMessage(ChatColor.YELLOW + "汚染水を飲んで腹を壊した...沸かすべきだった。");
+            }
+            // さらに感染リスクもある
+            if (Math.random() < 0.2 * diseaseChance) {
+                data.setInfected(true);
+                player.sendMessage(ChatColor.RED + "汚染水を飲んで気分が悪くなった...");
+            }
         }
     }
 
@@ -305,6 +348,7 @@ public class NutritionManager extends RealizModule implements Listener {
         ItemStack bottle = new ItemStack(Material.POTION);
         PotionMeta meta = (PotionMeta) bottle.getItemMeta();
         meta.setBasePotionData(new PotionData(PotionType.WATER));
+        meta.setDisplayName(ChatColor.AQUA + "清浄水");
         meta.getPersistentDataContainer().set(boiledKey, PersistentDataType.BYTE, (byte) 1);
         bottle.setItemMeta(meta);
         return bottle;
