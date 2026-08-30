@@ -100,7 +100,8 @@ public class HudManager extends RealizModule implements Listener {
 
         double stress = data.getStress();
         String stressEmoji = getStressEmoji(stress);
-        setScore(objective, ChatColor.LIGHT_PURPLE + "\uD83D\uDE30 ストレス: " + ChatColor.WHITE + stressEmoji, line--);
+        setScore(objective, ChatColor.LIGHT_PURPLE + "\uD83D\uDE30 ストレス: " + ChatColor.WHITE
+            + String.format("%.0f", stress) + "/100", line--);
 
         setScore(objective, ChatColor.DARK_GRAY + "━━━━━━━━━━━━━━", line--);
 

@@ -50,7 +50,8 @@ public class StressManager extends RealizModule implements Listener {
             ConfigManager cfg = plugin.getConfigManager();
             for (Player player : Bukkit.getOnlinePlayers()) {
                 PlayerData data = plugin.getDataManager().getData(player);
-                double delta = 0;
+                // 危険がなければ常時ゆるやかに落ち着いていく (ストレス100から抜け出せない詰み防止)
+                double delta = -1.5;
 
                 delta += evaluateDarkness(player);
                 delta += evaluateNearbyMobs(player);
@@ -152,7 +153,7 @@ public class StressManager extends RealizModule implements Listener {
                     if (block == Material.CAMPFIRE || block == Material.SOUL_CAMPFIRE
                         || block == Material.FURNACE || block == Material.BLAST_FURNACE
                         || block == Material.SMOKER) {
-                        return -2.0;
+                        return -3.0;
                     }
                 }
             }
@@ -161,11 +162,11 @@ public class StressManager extends RealizModule implements Listener {
     }
 
     private double evaluateNutrition(PlayerData data) {
-        return data.getNutritionBalance() > 60.0 ? -1.0 : 0.0;
+        return data.getNutritionBalance() > 50.0 ? -1.0 : 0.0;
     }
 
     private double evaluateHydration(PlayerData data) {
-        return data.getHydration() > 60.0 ? -1.0 : 0.0;
+        return data.getHydration() > 50.0 ? -1.0 : 0.0;
     }
 
     private double evaluateSleeping(Player player) {
@@ -187,7 +188,6 @@ public class StressManager extends RealizModule implements Listener {
     }
 
     private void displayStress(Player player, PlayerData data) {
-        String emoji = MessageUtil.getStressEmoji(data.getStress());
         ChatColor color;
         if (data.getStress() < 20) color = ChatColor.GRAY;
         else if (data.getStress() < 40) color = ChatColor.GREEN;
@@ -196,6 +196,6 @@ public class StressManager extends RealizModule implements Listener {
         else color = ChatColor.RED;
 
         MessageUtil.sendActionBar(player,
-            color + "Stress: " + emoji + " " + String.format("%.0f%%", data.getStress()));
+            color + "✕ ストレス " + String.format("%.0f", data.getStress()) + "/100");
     }
 }
