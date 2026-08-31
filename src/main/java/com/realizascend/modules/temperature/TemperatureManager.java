@@ -94,7 +94,7 @@ public class TemperatureManager extends RealizModule implements Listener {
         double ambient = calculateAmbientTemperature(player);
         double bodyTemp = data.getBodyTemperature();
 
-        double shiftRate = 0.5;
+        double shiftRate = 0.6;
         double armorInsulation = getArmorInsulation(player);
         double armorHeatResist = getArmorHeatResist(player);
 
@@ -118,35 +118,41 @@ public class TemperatureManager extends RealizModule implements Listener {
 
     private double calculateAmbientTemperature(Player player) {
         Location loc = player.getLocation();
-        double temp = 20.0;
-
-        SeasonManager.Season season = plugin.getSeasonManager().getCurrentSeason();
-        switch (season) {
-            case SPRING:  temp += 0; break;
-            case SUMMER:  temp += 15; break;
-            case AUTUMN:  temp -= 5; break;
-            case WINTER:   temp -= 20; break;
-            case PLUM_RAIN: temp -= 3; break;
-        }
-
         Biome biome = loc.getBlock().getBiome();
         String biomeName = biome.name().toUpperCase();
-        if (biomeName.contains("SNOWY") || biomeName.contains("FROZEN") || biomeName.contains("ICE")
-                || biomeName.contains("TAIGA") || biomeName.contains("GROVE")
-                || biomeName.contains("JAGGED") || biomeName.contains("STONY_PEAKS")) {
-            temp -= 10;
-        } else if (biomeName.equals("THE_END") || biomeName.equals("SMALL_END_ISLANDS")
-                || biomeName.equals("END_MIDLANDS") || biomeName.equals("END_HIGHLANDS")
-                || biomeName.equals("END_BARRENS")) {
-            // エンドは常時低温
-            temp -= 20;
-        } else if (biomeName.contains("DESERT") || biomeName.contains("BADLANDS")
-                || biomeName.contains("SAVANNA") || biomeName.contains("MESA")
-                || biomeName.contains("JUNGLE") || biomeName.contains("BEACH")
-                || biomeName.equals("NETHER_WASTES") || biomeName.equals("CRIMSON_FOREST")
-                || biomeName.equals("WARPED_FOREST") || biomeName.equals("SOUL_SAND_VALLEY")
-                || biomeName.equals("BASALT_DELTAS")) {
-            temp += 15;
+        double temp = 20.0;
+
+        boolean isNether = biomeName.equals("NETHER_WASTES") || biomeName.equals("CRIMSON_FOREST")
+            || biomeName.equals("WARPED_FOREST") || biomeName.equals("SOUL_SAND_VALLEY")
+            || biomeName.equals("BASALT_DELTAS");
+        boolean isEnd = biomeName.equals("THE_END") || biomeName.equals("SMALL_END_ISLANDS")
+            || biomeName.equals("END_MIDLANDS") || biomeName.equals("END_HIGHLANDS")
+            || biomeName.equals("END_BARRENS");
+
+        // ネザー・エンドは季節の影響を受けない (常時高温/低温)
+        if (isNether) {
+            temp = 40;
+        } else if (isEnd) {
+            temp = 2;
+        } else {
+            SeasonManager.Season season = plugin.getSeasonManager().getCurrentSeason();
+            switch (season) {
+                case SPRING:  temp += 0; break;
+                case SUMMER:  temp += 6; break;   // 真夏でも即死しない程度に緩和
+                case AUTUMN:  temp -= 5; break;
+                case WINTER:   temp -= 20; break;
+                case PLUM_RAIN: temp -= 3; break;
+            }
+
+            if (biomeName.contains("SNOWY") || biomeName.contains("FROZEN") || biomeName.contains("ICE")
+                    || biomeName.contains("TAIGA") || biomeName.contains("GROVE")
+                    || biomeName.contains("JAGGED") || biomeName.contains("STONY_PEAKS")) {
+                temp -= 10;
+            } else if (biomeName.contains("DESERT") || biomeName.contains("BADLANDS")
+                    || biomeName.contains("SAVANNA") || biomeName.contains("MESA")
+                    || biomeName.contains("JUNGLE") || biomeName.contains("BEACH")) {
+                temp += 10;
+            }
         }
 
         if (loc.getWorld().hasStorm()) {
@@ -161,7 +167,8 @@ public class TemperatureManager extends RealizModule implements Listener {
         if (y > 128) {
             temp -= 0.05 * (y - 64);
         } else if (y < 40) {
-            temp += 0.05 * (64 - y);
+            // 地下は涼しい (暑さからの避難場所になる)
+            temp -= 2;
         }
 
         long time = loc.getWorld().getTime();
