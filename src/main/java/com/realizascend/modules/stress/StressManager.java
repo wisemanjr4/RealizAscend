@@ -44,6 +44,18 @@ public class StressManager extends RealizModule implements Listener {
         HandlerList.unregisterAll(this);
     }
 
+    // 攻撃を受けるとストレスが上がる
+    @EventHandler
+    public void onDamage(EntityDamageEvent event) {
+        if (!(event.getEntity() instanceof Player player)) return;
+        if (!com.realizascend.RealizAscend.isSurvival(player)) return;
+        if (event.getCause() == EntityDamageEvent.DamageCause.STARVATION) return;
+        if (event.getCause() == EntityDamageEvent.DamageCause.SUICIDE) return;
+        double gain = 1.0 + event.getDamage() * 0.5;
+        PlayerData data = plugin.getDataManager().getData(player);
+        data.setStress(data.getStress() + gain);
+    }
+
     private class StressRunnable extends BukkitRunnable {
         @Override
         public void run() {
@@ -60,6 +72,10 @@ public class StressManager extends RealizModule implements Listener {
                 delta += evaluateSleepDebt(data);
                 delta += evaluateInjuries(data);
                 delta += evaluateBleeding(data);
+                delta += evaluateLowHealth(player);
+                delta += evaluateLowStamina(data);
+                delta += evaluateDangerDimension(player);
+                delta += evaluateLowNourishment(data);
                 delta += evaluateWellLit(player);
                 delta += evaluateCampfire(player);
                 delta += evaluateNutrition(data);
@@ -125,6 +141,25 @@ public class StressManager extends RealizModule implements Listener {
 
     private double evaluateSleepDebt(PlayerData data) {
         return Math.min(data.getSleepDebt(), 5) * 1.0;
+    }
+
+    private double evaluateLowHealth(Player player) {
+        return player.getHealth() < player.getMaxHealth() * 0.3 ? 2.0 : 0.0;
+    }
+
+    private double evaluateLowStamina(PlayerData data) {
+        return data.getStamina() < 20 ? 1.5 : 0.0;
+    }
+
+    private double evaluateDangerDimension(Player player) {
+        org.bukkit.World.Environment env = player.getWorld().getEnvironment();
+        if (env == org.bukkit.World.Environment.NETHER) return 2.0;
+        if (env == org.bukkit.World.Environment.THE_END) return 2.5;
+        return 0.0;
+    }
+
+    private double evaluateLowNourishment(PlayerData data) {
+        return (data.getCalories() < 30 || data.getHydration() < 30) ? 1.0 : 0.0;
     }
 
     private double evaluateInjuries(PlayerData data) {
