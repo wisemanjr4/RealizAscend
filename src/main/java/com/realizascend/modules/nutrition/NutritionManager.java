@@ -520,6 +520,7 @@ public class NutritionManager extends RealizModule implements Listener {
         public void run() {
             ConfigManager cfg = plugin.getConfigManager();
             for (Player player : Bukkit.getOnlinePlayers()) {
+                if (!com.realizascend.RealizAscend.isSurvival(player)) continue;
                 PlayerData data = plugin.getDataManager().getData(player);
 
                 double calorieEff = plugin.getSkillManager().getAbilityEffectValue(player, "CALORIE_EFFICIENCY");

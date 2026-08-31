@@ -189,6 +189,7 @@ public class WeightManager extends RealizModule {
                 double overLimit = plugin.getConfigManager().weightOverLimit;
 
                 for (Player player : Bukkit.getOnlinePlayers()) {
+                    if (!com.realizascend.RealizAscend.isSurvival(player)) continue;
                     double weight = calculateTotalWeight(player);
                     plugin.getDataManager().getData(player).setCurrentWeight(weight);
 

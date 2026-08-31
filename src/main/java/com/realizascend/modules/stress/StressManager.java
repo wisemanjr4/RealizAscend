@@ -49,6 +49,7 @@ public class StressManager extends RealizModule implements Listener {
         public void run() {
             ConfigManager cfg = plugin.getConfigManager();
             for (Player player : Bukkit.getOnlinePlayers()) {
+                if (!com.realizascend.RealizAscend.isSurvival(player)) continue;
                 PlayerData data = plugin.getDataManager().getData(player);
                 // 常時低下は撤廃。ストレスは「快適な環境」(明るさ・火・栄養・睡眠・酒)で下がる
                 double delta = 0;

@@ -84,6 +84,7 @@ public class StatusManager extends RealizModule {
             @Override
             public void run() {
                 for (Player player : Bukkit.getOnlinePlayers()) {
+                    if (!com.realizascend.RealizAscend.isSurvival(player)) continue;
                     processFlavor(player);
                 }
             }

@@ -68,6 +68,7 @@ public class StaminaManager extends RealizModule implements Listener {
     public void onMove(PlayerMoveEvent event) {
         if (!event.hasChangedPosition()) return;
         Player player = event.getPlayer();
+        if (!com.realizascend.RealizAscend.isSurvival(player)) return;
         double deltaY = event.getTo().getY() - event.getFrom().getY();
 
         if (deltaY > 0.4 && !player.isInWater() && !player.isClimbing() && !player.isFlying()) {
@@ -86,12 +87,14 @@ public class StaminaManager extends RealizModule implements Listener {
     public void onAttack(EntityDamageByEntityEvent event) {
         if (!(event.getDamager() instanceof Player)) return;
         Player player = (Player) event.getDamager();
+        if (!com.realizascend.RealizAscend.isSurvival(player)) return;
         applyAttackCost(player);
     }
 
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event) {
         Player player = event.getPlayer();
+        if (!com.realizascend.RealizAscend.isSurvival(player)) return;
         PlayerData data = plugin.getDataManager().getData(player);
         ConfigManager cfg = plugin.getConfigManager();
         data.setFatigue(data.getFatigue() + 0.05);
@@ -100,6 +103,7 @@ public class StaminaManager extends RealizModule implements Listener {
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent event) {
         Player player = event.getPlayer();
+        if (!com.realizascend.RealizAscend.isSurvival(player)) return;
         PlayerData data = plugin.getDataManager().getData(player);
         ConfigManager cfg = plugin.getConfigManager();
         // 速築き: ブロック設置のスタミナ消費-40%
@@ -200,8 +204,10 @@ public class StaminaManager extends RealizModule implements Listener {
                 lastDayCheck = currentDay;
             }
 
-            for (Player player : Bukkit.getOnlinePlayers()) {
+for (Player player : Bukkit.getOnlinePlayers()) {
+                if (!com.realizascend.RealizAscend.isSurvival(player)) continue;
                 PlayerData data = plugin.getDataManager().getData(player);
+
                 double maxStaminaMult = plugin.getSkillManager().getAbilityEffectValue(player, "MAX_STAMINA");
                 double sprintCostMult = plugin.getSkillManager().getAbilityEffectValue(player, "SPRINT_COST");
                 double walkCostMult = plugin.getSkillManager().getAbilityEffectValue(player, "WALK_COST");

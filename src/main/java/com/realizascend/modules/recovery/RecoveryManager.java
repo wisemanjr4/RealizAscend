@@ -46,6 +46,7 @@ public class RecoveryManager extends RealizModule {
                 for (Map.Entry<UUID, List<RecoveryEffect>> entry : new ArrayList<>(active.entrySet())) {
                     Player player = Bukkit.getPlayer(entry.getKey());
                     if (player == null) continue;
+                    if (!com.realizascend.RealizAscend.isSurvival(player)) continue;
                     PlayerData data = plugin.getDataManager().getData(player);
 
                     List<RecoveryEffect> effects = entry.getValue();

@@ -46,6 +46,7 @@ public class TemperatureManager extends RealizModule implements Listener {
             public void run() {
                 fatalTickCounter++;
                 for (Player player : Bukkit.getOnlinePlayers()) {
+                    if (!com.realizascend.RealizAscend.isSurvival(player)) continue;
                     processPlayer(player);
                 }
             }

@@ -267,6 +267,7 @@ public class FoodManager extends RealizModule implements Listener {
         public void run() {
             long now = System.currentTimeMillis();
             for (Player player : Bukkit.getOnlinePlayers()) {
+                if (!com.realizascend.RealizAscend.isSurvival(player)) continue;
                 org.bukkit.inventory.PlayerInventory inv = player.getInventory();
                 List<ItemStack> all = new ArrayList<>();
                 all.addAll(java.util.Arrays.asList(inv.getContents()));

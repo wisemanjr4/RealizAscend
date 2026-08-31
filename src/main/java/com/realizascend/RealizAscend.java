@@ -27,6 +27,7 @@ import com.realizascend.modules.farm.FarmingManager;
 import com.realizascend.modules.cookingstation.CookingStationManager;
 import com.realizascend.modules.stealth.StealthManager;
 import com.realizascend.modules.status.StatusManager;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class RealizAscend extends JavaPlugin {
@@ -150,6 +151,12 @@ public final class RealizAscend extends JavaPlugin {
     }
 
     public static RealizAscend getInstance() { return instance; }
+
+    // 生存要素を適用するかどうか (スペクテイター・クリエイティブでは適用しない)
+    public static boolean isSurvival(Player player) {
+        org.bukkit.GameMode gm = player.getGameMode();
+        return gm == org.bukkit.GameMode.SURVIVAL || gm == org.bukkit.GameMode.ADVENTURE;
+    }
     public ConfigManager getConfigManager() { return configManager; }
     public DataManager getDataManager() { return dataManager; }
     public SeasonManager getSeasonManager() { return seasonManager; }

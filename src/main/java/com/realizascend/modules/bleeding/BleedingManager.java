@@ -76,6 +76,7 @@ public class BleedingManager extends RealizModule implements Listener {
     @EventHandler
     public void onDamage(EntityDamageEvent event) {
         if (!(event.getEntity() instanceof Player)) return;
+        if (!com.realizascend.RealizAscend.isSurvival((Player) event.getEntity())) return;
         // バニラの飢餓ダメージは無効化 (栄養システム側で処理する)
         if (event.getCause() == EntityDamageEvent.DamageCause.STARVATION) {
             event.setCancelled(true);
@@ -318,6 +319,7 @@ public class BleedingManager extends RealizModule implements Listener {
         public void run() {
             ConfigManager cfg = plugin.getConfigManager();
             for (Player player : Bukkit.getOnlinePlayers()) {
+                if (!com.realizascend.RealizAscend.isSurvival(player)) continue;
                 PlayerData data = plugin.getDataManager().getData(player);
 
                 if (data.getNutritionBalance() > 50.0 && data.getBlood() < cfg.bleedingMaxBlood) {
@@ -383,6 +385,7 @@ public class BleedingManager extends RealizModule implements Listener {
         @Override
         public void run() {
             for (Player player : Bukkit.getOnlinePlayers()) {
+                if (!com.realizascend.RealizAscend.isSurvival(player)) continue;
                 PlayerData data = plugin.getDataManager().getData(player);
 
                 if (data.isFractured() && data.getNutritionBalance() > 40.0) {
