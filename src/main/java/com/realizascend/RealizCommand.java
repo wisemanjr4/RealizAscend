@@ -24,6 +24,7 @@ public class RealizCommand implements CommandExecutor {
             sender.sendMessage(ChatColor.YELLOW + "/realiz codex " + ChatColor.GRAY + "- コーデックスを開く");
             sender.sendMessage(ChatColor.YELLOW + "/realiz skill " + ChatColor.GRAY + "- スキルメニューを開く");
             sender.sendMessage(ChatColor.YELLOW + "/realiz status " + ChatColor.GRAY + "- 現在の異常状態を確認");
+            sender.sendMessage(ChatColor.YELLOW + "/realiz recipe " + ChatColor.GRAY + "- カスタムレシピを見る");
             sender.sendMessage(ChatColor.YELLOW + "/realiz reset <player> " + ChatColor.GRAY + "- プレイヤーデータをリセット");
             return true;
         }
@@ -76,6 +77,12 @@ public class RealizCommand implements CommandExecutor {
                                 + (reason.isEmpty() ? "" : ChatColor.GRAY + " (" + reason + ")"));
                         }
                     }
+                }
+                break;
+
+            case "recipe":
+                if (sender instanceof Player) {
+                    plugin.getRecipeManager().openRecipeMenu((Player) sender);
                 }
                 break;
 
