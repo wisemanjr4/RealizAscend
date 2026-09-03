@@ -145,6 +145,7 @@ public class MedicalManager extends RealizModule implements Listener {
             if (data.isTorsoInjured()) plugin.getRecoveryManager().healInjury(player, "TORSO", healSeconds);
             if (data.isLegsInjured()) plugin.getRecoveryManager().healInjury(player, "LEGS", healSeconds);
             player.playSound(player.getLocation(), Sound.ITEM_ARMOR_EQUIP_LEATHER, 1.0f, 1.2f);
+            plugin.getSkillManager().addXp(player, "MEDICAL", 4);
             player.sendMessage(ChatColor.GREEN + "包帯で傷を処置した。じわじわと回復する...");
         } else {
             player.sendMessage(ChatColor.GRAY + "処置すべき傷がない。");
@@ -158,6 +159,7 @@ public class MedicalManager extends RealizModule implements Listener {
             double treatBoost = plugin.getSkillManager().getAbilityEffectValue(player, "ALL_TREAT_BOOST");
             int seconds = (int) Math.max(10, 30 / treatBoost);
             plugin.getRecoveryManager().healFracture(player, seconds);
+            plugin.getSkillManager().addXp(player, "MEDICAL", 4);
             player.playSound(player.getLocation(), Sound.BLOCK_WOOD_PLACE, 1.0f, 1.0f);
             player.sendMessage(ChatColor.GREEN + "添え木で骨折を固定した。" + seconds + "秒で治る見込みだ。");
         } else {
@@ -171,6 +173,7 @@ public class MedicalManager extends RealizModule implements Listener {
         double medsBoost = plugin.getSkillManager().getAbilityEffectValue(player, "MEDS_BOOST")
             * plugin.getSkillManager().getAbilityEffectValue(player, "ALL_TREAT_BOOST");
         plugin.getRecoveryManager().addInfectionCure(player, 30 * medsBoost, 15);
+        plugin.getSkillManager().addXp(player, "MEDICAL", 5);
         player.sendMessage(ChatColor.AQUA + "消毒液を飲んだ。感染の進行が徐々に抑えられる...");
     }
 
@@ -179,6 +182,7 @@ public class MedicalManager extends RealizModule implements Listener {
         double medsBoost = plugin.getSkillManager().getAbilityEffectValue(player, "MEDS_BOOST")
             * plugin.getSkillManager().getAbilityEffectValue(player, "ALL_TREAT_BOOST");
         plugin.getRecoveryManager().addInfectionCure(player, 100 * medsBoost, 20);
+        plugin.getSkillManager().addXp(player, "MEDICAL", 8);
         player.sendMessage(ChatColor.AQUA + "抗生物質を服用した。感染症がじわじわと治っていく...");
     }
 
