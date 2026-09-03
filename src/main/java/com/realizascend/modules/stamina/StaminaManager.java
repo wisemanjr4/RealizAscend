@@ -7,15 +7,20 @@ import com.realizascend.data.PlayerData;
 import com.realizascend.util.MessageUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.block.Bed;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerBedLeaveEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -37,8 +42,21 @@ public class StaminaManager extends RealizModule implements Listener {
     private final Map<UUID, Long> bedEnterTime = new HashMap<>();
     private final Map<UUID, Integer> missedNights = new HashMap<>();
     private final Map<UUID, Long> burstUntilMap = new HashMap<>();
+    private final Map<UUID, RestData> resting = new HashMap<>();
     private final Set<UUID> sleptThisNight = new HashSet<>();
     private long lastDayCheck = -1;
+
+    private static final long REST_DURATION = 60000L; // 1分
+    private static final double REST_RADIUS_SQ = 64.0; // ベッドから8ブロック以内
+
+    private static class RestData {
+        final Location bedLocation;
+        final long startTime;
+        RestData(Location bedLocation, long startTime) {
+            this.bedLocation = bedLocation;
+            this.startTime = startTime;
+        }
+    }
 
     private BukkitTask tickTask;
 
@@ -61,6 +79,7 @@ public class StaminaManager extends RealizModule implements Listener {
         sleptThisNight.clear();
         missedNights.clear();
         burstUntilMap.clear();
+        resting.clear();
         HandlerList.unregisterAll(this);
     }
 
@@ -146,16 +165,83 @@ public class StaminaManager extends RealizModule implements Listener {
         boolean isDay = worldTime >= 0 && worldTime < 13000;
 
         if (isDay && enterTime != null) {
-            data.setFatigue(Math.max(0, data.getFatigue() - cfg.fatigueSleepRecovery));
-            data.setSleepDebt(0);
-            data.setHealthLevel(Math.min(100, data.getHealthLevel() + 5.0));
-            sleptThisNight.add(uuid);
-            missedNights.remove(uuid);
-            // 超回復: 睡眠でスタミナ上限が永続+5% (最大25%)
-            if (plugin.getSkillManager().getAbilityEffectValue(player, "SLEEP_STAMINA_BOOST") > 1.0) {
-                data.addStaminaBonusPercent(5);
+            applySleepRecovery(player);
+        }
+    }
+
+    // 睡眠・休息共通の回復処理
+    private void applySleepRecovery(Player player) {
+        UUID uuid = player.getUniqueId();
+        PlayerData data = plugin.getDataManager().getData(player);
+        ConfigManager cfg = plugin.getConfigManager();
+        data.setFatigue(Math.max(0, data.getFatigue() - cfg.fatigueSleepRecovery));
+        data.setSleepDebt(0);
+        data.setHealthLevel(Math.min(100, data.getHealthLevel() + 5.0));
+        sleptThisNight.add(uuid);
+        missedNights.remove(uuid);
+        // 超回復: 睡眠でスタミナ上限が永続+5% (最大25%)
+        if (plugin.getSkillManager().getAbilityEffectValue(player, "SLEEP_STAMINA_BOOST") > 1.0) {
+            data.addStaminaBonusPercent(5);
+        }
+        player.sendMessage(ChatColor.GREEN + "ぐっすり眠れた。疲労が回復した!");
+    }
+
+    // 昼間にベッドを右クリック → 1分休憩で睡眠と同じ効果
+    @EventHandler
+    public void onRestStart(PlayerInteractEvent event) {
+        if (event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
+        if (!(event.getClickedBlock() instanceof org.bukkit.block.Bed)) return;
+        Player player = event.getPlayer();
+        if (!com.realizascend.RealizAscend.isSurvival(player)) return;
+
+        // 夜はバニラの睡眠に任せる
+        long time = player.getWorld().getTime();
+        if (time >= 12542 && time <= 23850) return;
+
+        PlayerData data = plugin.getDataManager().getData(player);
+        if (data.getFatigue() < 30.0) {
+            player.sendMessage(ChatColor.GRAY + "疲れが足りず休めない。");
+            return;
+        }
+        if (resting.containsKey(player.getUniqueId())) {
+            player.sendMessage(ChatColor.GRAY + "すでに休息中だ。");
+            return;
+        }
+
+        event.setCancelled(true);
+        resting.put(player.getUniqueId(), new RestData(
+            event.getClickedBlock().getLocation(), System.currentTimeMillis()));
+        player.sendMessage(ChatColor.YELLOW + "ベッドで休息を始めた。1分待てば疲労が回復する。");
+    }
+
+    // 休息中の中断処理
+    private void checkResting() {
+        long now = System.currentTimeMillis();
+        resting.entrySet().removeIf(entry -> {
+            Player player = Bukkit.getPlayer(entry.getKey());
+            if (player == null) return true;
+            RestData data = entry.getValue();
+            // ベッドから離れすぎたら中断
+            if (data.bedLocation.getWorld() == null
+                || !player.getLocation().getWorld().equals(data.bedLocation.getWorld())
+                || player.getLocation().distanceSquared(data.bedLocation) > REST_RADIUS_SQ) {
+                player.sendMessage(ChatColor.GRAY + "ベッドから離れたため休息が中断された。");
+                return true;
             }
-            player.sendMessage(ChatColor.GREEN + "ぐっすり眠れた。疲労が回復した!");
+            if (now - data.startTime >= REST_DURATION) {
+                applySleepRecovery(player);
+                return true;
+            }
+            return false;
+        });
+    }
+
+    @EventHandler
+    public void onDamageInterrupt(EntityDamageEvent event) {
+        if (!(event.getEntity() instanceof Player player)) return;
+        RestData data = resting.remove(player.getUniqueId());
+        if (data != null) {
+            player.sendMessage(ChatColor.GRAY + "ダメージを受けて休息が中断された。");
         }
     }
 
@@ -180,6 +266,7 @@ public class StaminaManager extends RealizModule implements Listener {
         @Override
         public void run() {
             tickCount++;
+            checkResting();
             ConfigManager cfg = plugin.getConfigManager();
             long currentDay = getCurrentDay();
 
