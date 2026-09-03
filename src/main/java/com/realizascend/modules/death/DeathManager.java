@@ -19,6 +19,9 @@ import java.util.Map;
 
 public class DeathManager extends RealizModule implements Listener {
 
+    private final java.util.Map<java.util.UUID, Long> lastRespawn = new java.util.HashMap<>();
+    private static final long RESPAWN_COOLDOWN = 3000L; // 二重死亡の2回目リスポーンはペナルティ適用しない
+
     public DeathManager(RealizAscend plugin) {
         super(plugin);
     }
@@ -56,6 +59,16 @@ public class DeathManager extends RealizModule implements Listener {
     public void onPlayerRespawn(PlayerRespawnEvent event) {
         Player player = event.getPlayer();
         PlayerData data = plugin.getDataManager().getData(player);
+
+        // 二重死亡の2回目のリスポーンにはペナルティを適用しない (詰み防止)
+        java.util.UUID uuid = player.getUniqueId();
+        long now = System.currentTimeMillis();
+        Long last = lastRespawn.get(uuid);
+        if (last != null && now - last < RESPAWN_COOLDOWN) {
+            lastRespawn.put(uuid, now);
+            return;
+        }
+        lastRespawn.put(uuid, now);
 
         player.setHealth(Math.max(6, player.getMaxHealth() * 0.7));
         player.setFoodLevel((int) Math.round(data.getNutritionBalance() / 100.0 * 20.0));

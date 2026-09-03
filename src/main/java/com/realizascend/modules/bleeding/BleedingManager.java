@@ -83,6 +83,11 @@ public class BleedingManager extends RealizModule implements Listener {
             return;
         }
         Player player = (Player) event.getEntity();
+        // 既に死亡済み(HP0)なら再処理しない (二重死亡の防止)
+        if (player.getHealth() <= 0) {
+            event.setCancelled(true);
+            return;
+        }
         PlayerData data = plugin.getDataManager().getData(player);
         ConfigManager cfg = plugin.getConfigManager();
         double damage = event.getDamage();

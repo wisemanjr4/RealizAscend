@@ -40,6 +40,8 @@ public class GraveManager extends RealizModule implements Listener {
 
     private final Map<UUID, List<GraveData>> graves = new HashMap<>();
     private final Map<Inventory, GraveData> openGraves = new HashMap<>();
+    private final Map<UUID, Long> lastDeath = new HashMap<>();
+    private static final long DEATH_COOLDOWN = 3000L; // 二重死亡防止 (3秒以内の再死亡は無視)
     private final Set<Location> graveBlocks = new HashSet<>();
     private BukkitRunnable cleanupTask;
 
@@ -107,12 +109,23 @@ public class GraveManager extends RealizModule implements Listener {
         graves.clear();
         openGraves.clear();
         graveBlocks.clear();
+        lastDeath.clear();
     }
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onPlayerDeath(PlayerDeathEvent event) {
         Player player = event.getEntity();
         final UUID uuid = player.getUniqueId();
+
+        long now = System.currentTimeMillis();
+        Long last = lastDeath.get(uuid);
+        if (last != null && now - last < DEATH_COOLDOWN) {
+            // 同一瞬間の二重死亡(2回目)は墓を作らない (1つ目の墓がアイテムを持つ)
+            event.getDrops().clear();
+            return;
+        }
+        lastDeath.put(uuid, now);
+
         final String name = player.getName();
         final Location deathLoc = player.getLocation().clone();
 
