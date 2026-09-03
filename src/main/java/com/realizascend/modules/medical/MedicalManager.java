@@ -169,10 +169,11 @@ public class MedicalManager extends RealizModule implements Listener {
 
     private void drinkAntiseptic(Player player) {
         consumeOne(player);
-        // 薬学特化/神の手: 薬効上昇
+        // 薬学特化/神の手/薬学段階: 薬効上昇
         double medsBoost = plugin.getSkillManager().getAbilityEffectValue(player, "MEDS_BOOST")
             * plugin.getSkillManager().getAbilityEffectValue(player, "ALL_TREAT_BOOST");
-        plugin.getRecoveryManager().addInfectionCure(player, 30 * medsBoost, 15);
+        double pharmaBoost = getPharmaBoost(player);
+        plugin.getRecoveryManager().addInfectionCure(player, 30 * medsBoost * pharmaBoost, 15);
         plugin.getSkillManager().addXp(player, "MEDICAL", 5);
         player.sendMessage(ChatColor.AQUA + "消毒液を飲んだ。感染の進行が徐々に抑えられる...");
     }
@@ -181,9 +182,25 @@ public class MedicalManager extends RealizModule implements Listener {
         consumeOne(player);
         double medsBoost = plugin.getSkillManager().getAbilityEffectValue(player, "MEDS_BOOST")
             * plugin.getSkillManager().getAbilityEffectValue(player, "ALL_TREAT_BOOST");
-        plugin.getRecoveryManager().addInfectionCure(player, 100 * medsBoost, 20);
+        double pharmaBoost = getPharmaBoost(player);
+        plugin.getRecoveryManager().addInfectionCure(player, 100 * medsBoost * pharmaBoost, 20);
         plugin.getSkillManager().addXp(player, "MEDICAL", 8);
         player.sendMessage(ChatColor.AQUA + "抗生物質を服用した。感染症がじわじわと治っていく...");
+    }
+
+    // 薬学の段階が高いほど薬が強く効く (薬学Ⅰ+10% / Ⅱ+25% / Ⅲ+50%)
+    private double getPharmaBoost(Player player) {
+        PlayerData data = plugin.getDataManager().getData(player);
+        int tier = 0;
+        if (data.getAbilityLevel("med_pharma_3") > 0) tier = 3;
+        else if (data.getAbilityLevel("med_pharma_2") > 0) tier = 2;
+        else if (data.getAbilityLevel("med_pharma_1") > 0) tier = 1;
+        switch (tier) {
+            case 1: return 1.10;
+            case 2: return 1.25;
+            case 3: return 1.50;
+            default: return 1.0;
+        }
     }
 
     private void consumeOne(Player player) {
