@@ -344,7 +344,8 @@ public class SkillManager extends RealizModule implements Listener {
     // ==================== Core Skill Methods ====================
 
     public int getXpForLevel(int level) {
-        return (int) (100 * (level + 1) * 1.5);
+        // 序盤を上げやすく、高レベルほど重くなる (0→1は75XP)
+        return (int) (75 * (level + 1));
     }
 
     public int getTotalPointsForLevel(int level) {
@@ -534,7 +535,7 @@ public class SkillManager extends RealizModule implements Listener {
             double total = sprintDistance.getOrDefault(uuid, 0.0) + dist;
             if (total >= 100.0) {
                 int awards = (int) (total / 100.0);
-                addXp(player, "ENDURANCE", awards * 5.0);
+                addXp(player, "ENDURANCE", awards * 8.0);
                 sprintDistance.put(uuid, total - awards * 100.0);
             } else {
                 sprintDistance.put(uuid, total);
@@ -547,7 +548,7 @@ public class SkillManager extends RealizModule implements Listener {
             double total = swimDistance.getOrDefault(uuid, 0.0) + dist;
             if (total >= 50.0) {
                 int awards = (int) (total / 50.0);
-                addXp(player, "ENDURANCE", awards * 3.0);
+                addXp(player, "ENDURANCE", awards * 5.0);
                 swimDistance.put(uuid, total - awards * 50.0);
             } else {
                 swimDistance.put(uuid, total);
@@ -563,10 +564,10 @@ public class SkillManager extends RealizModule implements Listener {
         Player player = (Player) event.getDamager();
         double damage = event.getDamage();
 
-        double strengthXp = damage * 2.0;
+        double strengthXp = damage * 3.0;
         addXp(player, "STRENGTH", strengthXp);
 
-        double combatXp = damage * 1.5;
+        double combatXp = damage * 2.0;
         Map<String, Double> effects = getAbilityEffects(player);
         if (effects.containsKey("MELEE_XP_RATE")) {
             combatXp *= effects.get("MELEE_XP_RATE");
@@ -581,12 +582,12 @@ public class SkillManager extends RealizModule implements Listener {
         String toolName = tool.name();
 
         if (toolName.contains("PICKAXE") || toolName.contains("AXE")) {
-            addXp(player, "STRENGTH", 2.0);
+            addXp(player, "STRENGTH", 3.0);
         }
 
         Material blockType = event.getBlock().getType();
         if (isCrop(blockType)) {
-            addXp(player, "FARMING", 5.0);
+            addXp(player, "FARMING", 8.0);
         }
     }
 
@@ -632,7 +633,7 @@ public class SkillManager extends RealizModule implements Listener {
         Player player = event.getPlayer();
         Material type = event.getItem().getType();
         if (type.isEdible()) {
-            addXp(player, "METABOLISM", 3.0);
+            addXp(player, "METABOLISM", 4.0);
         }
     }
 
@@ -644,7 +645,7 @@ public class SkillManager extends RealizModule implements Listener {
         blocksPlaced.put(uuid, count);
 
         if (count >= 50) {
-            addXp(player, "BUILDING", 5.0 * (count / 50.0));
+            addXp(player, "BUILDING", 10.0 * (count / 50.0));
             blocksPlaced.put(uuid, count % 50);
         }
     }
@@ -654,7 +655,7 @@ public class SkillManager extends RealizModule implements Listener {
         if (!(event.getEntity() instanceof Player)) return;
         Player player = (Player) event.getEntity();
         double damage = event.getFinalDamage();
-        addXp(player, "RESISTANCE", damage * 1.5);
+        addXp(player, "RESISTANCE", damage * 3.0);
     }
 
     @EventHandler(priority = org.bukkit.event.EventPriority.MONITOR, ignoreCancelled = true)
@@ -664,7 +665,7 @@ public class SkillManager extends RealizModule implements Listener {
         if (event.getSlotType() != InventoryType.SlotType.RESULT) return;
         if (event.getCurrentItem() == null || event.getCurrentItem().getType() == Material.AIR) return;
         if (isCookedFood(event.getCurrentItem().getType())) {
-            addXp(player, "COOKING", event.getCurrentItem().getAmount() * 2.0);
+            addXp(player, "COOKING", event.getCurrentItem().getAmount() * 4.0);
         }
     }
 
@@ -682,7 +683,7 @@ public class SkillManager extends RealizModule implements Listener {
         if (event.getItem() == null) return;
         Material type = event.getItem().getType();
         if (isSeed(type)) {
-            addXp(event.getPlayer(), "FARMING", 2.0);
+            addXp(event.getPlayer(), "FARMING", 3.0);
         }
     }
 

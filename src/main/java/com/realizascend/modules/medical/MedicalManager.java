@@ -17,8 +17,10 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.ShapelessRecipe;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionData;
@@ -145,7 +147,7 @@ public class MedicalManager extends RealizModule implements Listener {
             if (data.isTorsoInjured()) plugin.getRecoveryManager().healInjury(player, "TORSO", healSeconds);
             if (data.isLegsInjured()) plugin.getRecoveryManager().healInjury(player, "LEGS", healSeconds);
             player.playSound(player.getLocation(), Sound.ITEM_ARMOR_EQUIP_LEATHER, 1.0f, 1.2f);
-            plugin.getSkillManager().addXp(player, "MEDICAL", 4);
+            plugin.getSkillManager().addXp(player, "MEDICAL", 8);
             player.sendMessage(ChatColor.GREEN + "包帯で傷を処置した。じわじわと回復する...");
         } else {
             player.sendMessage(ChatColor.GRAY + "処置すべき傷がない。");
@@ -159,7 +161,7 @@ public class MedicalManager extends RealizModule implements Listener {
             double treatBoost = plugin.getSkillManager().getAbilityEffectValue(player, "ALL_TREAT_BOOST");
             int seconds = (int) Math.max(10, 30 / treatBoost);
             plugin.getRecoveryManager().healFracture(player, seconds);
-            plugin.getSkillManager().addXp(player, "MEDICAL", 4);
+            plugin.getSkillManager().addXp(player, "MEDICAL", 8);
             player.playSound(player.getLocation(), Sound.BLOCK_WOOD_PLACE, 1.0f, 1.0f);
             player.sendMessage(ChatColor.GREEN + "添え木で骨折を固定した。" + seconds + "秒で治る見込みだ。");
         } else {
@@ -174,7 +176,7 @@ public class MedicalManager extends RealizModule implements Listener {
             * plugin.getSkillManager().getAbilityEffectValue(player, "ALL_TREAT_BOOST");
         double pharmaBoost = getPharmaBoost(player);
         plugin.getRecoveryManager().addInfectionCure(player, 30 * medsBoost * pharmaBoost, 15);
-        plugin.getSkillManager().addXp(player, "MEDICAL", 5);
+        plugin.getSkillManager().addXp(player, "MEDICAL", 10);
         player.sendMessage(ChatColor.AQUA + "消毒液を飲んだ。感染の進行が徐々に抑えられる...");
     }
 
@@ -184,7 +186,7 @@ public class MedicalManager extends RealizModule implements Listener {
             * plugin.getSkillManager().getAbilityEffectValue(player, "ALL_TREAT_BOOST");
         double pharmaBoost = getPharmaBoost(player);
         plugin.getRecoveryManager().addInfectionCure(player, 100 * medsBoost * pharmaBoost, 20);
-        plugin.getSkillManager().addXp(player, "MEDICAL", 8);
+        plugin.getSkillManager().addXp(player, "MEDICAL", 12);
         player.sendMessage(ChatColor.AQUA + "抗生物質を服用した。感染症がじわじわと治っていく...");
     }
 
@@ -204,20 +206,25 @@ public class MedicalManager extends RealizModule implements Listener {
     }
 
     private void consumeOne(Player player) {
-        org.bukkit.inventory.PlayerInventory inv = player.getInventory();
+        PlayerInventory inv = player.getInventory();
         ItemStack main = inv.getItemInMainHand();
         ItemStack off = inv.getItemInOffHand();
         ItemStack target = null;
-        if (main != null && isAnyMedical(main)) target = main;
-        else if (off != null && isAnyMedical(off)) target = off;
+        boolean offhand = false;
+        if (isAnyMedical(main)) {
+            target = main;
+        } else if (isAnyMedical(off)) {
+            target = off;
+            offhand = true;
+        }
         if (target == null) return;
 
         if (target.getAmount() > 1) {
             target.setAmount(target.getAmount() - 1);
-        } else if (target == main) {
-            inv.setItemInMainHand(null);
-        } else {
+        } else if (offhand) {
             inv.setItemInOffHand(null);
+        } else {
+            inv.setItemInMainHand(null);
         }
     }
 
@@ -231,12 +238,13 @@ public class MedicalManager extends RealizModule implements Listener {
     }
 
     private boolean isMedicalItem(ItemStack item, NamespacedKey key) {
-        return item.getItemMeta().getPersistentDataContainer().has(key, PersistentDataType.BYTE);
+        return item.hasItemMeta()
+            && item.getItemMeta().getPersistentDataContainer().has(key, PersistentDataType.BYTE);
     }
 
     private ItemStack createBandage(int count) {
         ItemStack item = new ItemStack(Material.PAPER, count);
-        org.bukkit.inventory.meta.ItemMeta meta = item.getItemMeta();
+        ItemMeta meta = item.getItemMeta();
         meta.setDisplayName(ChatColor.WHITE + "包帯");
         List<String> lore = new ArrayList<>();
         lore.add(ChatColor.GRAY + "右クリックで出血・負傷を処置する");
@@ -249,7 +257,7 @@ public class MedicalManager extends RealizModule implements Listener {
 
     private ItemStack createSplint() {
         ItemStack item = new ItemStack(Material.STICK);
-        org.bukkit.inventory.meta.ItemMeta meta = item.getItemMeta();
+        ItemMeta meta = item.getItemMeta();
         meta.setDisplayName(ChatColor.WHITE + "添え木");
         List<String> lore = new ArrayList<>();
         lore.add(ChatColor.GRAY + "右クリックで骨折を固定する");
