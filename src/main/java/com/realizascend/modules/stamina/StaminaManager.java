@@ -190,7 +190,8 @@ public class StaminaManager extends RealizModule implements Listener {
     @EventHandler
     public void onRestStart(PlayerInteractEvent event) {
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
-        if (!(event.getClickedBlock() instanceof org.bukkit.block.Bed)) return;
+        org.bukkit.block.Block block = event.getClickedBlock();
+        if (block == null || !(block.getState() instanceof Bed)) return;
         Player player = event.getPlayer();
         if (!com.realizascend.RealizAscend.isSurvival(player)) return;
 
@@ -198,19 +199,32 @@ public class StaminaManager extends RealizModule implements Listener {
         long time = player.getWorld().getTime();
         if (time >= 12542 && time <= 23850) return;
 
+        startRest(player, block.getLocation());
+        event.setCancelled(true);
+    }
+
+    // 昼間にベッドへ入った場合のフォールバック (バニラの「夜にしか眠れない」を抑止)
+    @EventHandler
+    public void onBedEnterDay(PlayerBedEnterEvent event) {
+        Player player = event.getPlayer();
+        if (!com.realizascend.RealizAscend.isSurvival(player)) return;
+        long time = player.getWorld().getTime();
+        if (time >= 12542 && time <= 23850) return; // 夜はバニラに任せる
+
+        event.setCancelled(true);
+        startRest(player, event.getBed().getLocation());
+    }
+
+    private void startRest(Player player, Location bedLocation) {
         PlayerData data = plugin.getDataManager().getData(player);
         if (data.getFatigue() < 30.0) {
             player.sendMessage(ChatColor.GRAY + "疲れが足りず休めない。");
             return;
         }
         if (resting.containsKey(player.getUniqueId())) {
-            player.sendMessage(ChatColor.GRAY + "すでに休息中だ。");
             return;
         }
-
-        event.setCancelled(true);
-        resting.put(player.getUniqueId(), new RestData(
-            event.getClickedBlock().getLocation(), System.currentTimeMillis()));
+        resting.put(player.getUniqueId(), new RestData(bedLocation, System.currentTimeMillis()));
         player.sendMessage(ChatColor.YELLOW + "ベッドで休息を始めた。1分待てば疲労が回復する。");
     }
 
