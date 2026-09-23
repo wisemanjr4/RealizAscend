@@ -161,6 +161,22 @@ public class CookingStationMenu {
         // ===== 追加: 戦闘食・行軍食 =====
         DISHES.add(new Dish(List.of(Material.COOKED_BEEF, Material.SUGAR, Material.CHARCOAL),
             Material.COOKED_BEEF, "ビーフジャーキー", 18, 18, 1, 10, -15, null, 0, false, "DRIED"));
+
+        // ===== 簡単な料理 (スキル解放なし・材料2個) =====
+        DISHES.add(new Dish(List.of(Material.BEEF, Material.STICK),
+            Material.COOKED_BEEF, "肉の串焼き", 15, 15, 2, 3, -3, null, 0, false));
+        DISHES.add(new Dish(List.of(Material.SALMON, Material.STICK),
+            Material.COOKED_SALMON, "魚の串焼き", 12, 14, 2, 3, -2, null, 0, false));
+        DISHES.add(new Dish(List.of(Material.APPLE, Material.CHARCOAL),
+            Material.APPLE, "焼きリンゴ", 10, 0, 12, 0, 10, null, 0, false));
+        DISHES.add(new Dish(List.of(Material.RED_MUSHROOM, Material.CHARCOAL),
+            Material.MUSHROOM_STEW, "きのこの焼き物", 8, 2, 6, 1, 5, null, 0, false));
+        DISHES.add(new Dish(List.of(Material.CARROT, Material.STICK),
+            Material.CARROT, "焼きニンジン", 8, 1, 6, 0, 5, null, 0, false));
+        DISHES.add(new Dish(List.of(Material.SWEET_BERRIES, Material.GLOW_BERRIES, Material.BOWL),
+            Material.MUSHROOM_STEW, "ベリーボウル", 10, 1, 15, 0, 15, null, 0, false));
+        DISHES.add(new Dish(List.of(Material.BREAD, Material.HONEY_BOTTLE),
+            Material.BREAD, "ハチミツパン", 18, 3, 8, 2, 12, null, 0, false));
         DISHES.add(new Dish(List.of(Material.BREAD, Material.COOKED_BEEF, Material.CHARCOAL),
             Material.BREAD, "行軍食パック", 30, 22, 3, 6, -10, null, 0, false, "VACUUM"));
 

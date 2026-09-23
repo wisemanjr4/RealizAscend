@@ -133,7 +133,7 @@ public class NutritionManager extends RealizModule implements Listener {
 
         // 生肉は食中毒リスク (設計書: 食材そのままはデバフあり)
         double diseaseChance = plugin.getSkillManager().getAbilityEffectValue(player, "DISEASE_CHANCE");
-        if (isRawMeat(material) && Math.random() < 0.2 * diseaseChance) {
+        if (isRawMeat(material) && Math.random() < 0.35 * diseaseChance) {
             player.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 200, 0));
             player.addPotionEffect(new PotionEffect(PotionEffectType.HUNGER, 200, 0));
             player.sendMessage(ChatColor.YELLOW + "生肉を食べて腹を壊した...火を通すべきだった。");
@@ -485,7 +485,7 @@ public class NutritionManager extends RealizModule implements Listener {
                 return new FoodValues(10, 15, 3, 3, -3);
             case BREAD:
             case BAKED_POTATO:
-                return new FoodValues(20, 5, 3, 2, -5);
+                return new FoodValues(15, 3, 2, 1, -3);
             case MELON_SLICE:
             case APPLE:
             case GOLDEN_APPLE:
@@ -510,9 +510,10 @@ public class NutritionManager extends RealizModule implements Listener {
             case SPIDER_EYE:
                 return new FoodValues(2, 3, 0, 1, -5);
             case COOKIE:
+                return new FoodValues(10, 1, 1, 2, -5);
             case CAKE:
             case PUMPKIN_PIE:
-                return new FoodValues(25, 2, 1, 1, -10);
+                return new FoodValues(15, 3, 3, 2, -8);
             case HONEY_BOTTLE:
                 return new FoodValues(8, 0, 5, 0, 5);
             case PUFFERFISH:
@@ -522,9 +523,17 @@ public class NutritionManager extends RealizModule implements Listener {
                 return new FoodValues(8, 18, 3, 5, -3);
             case COD:
             case SALMON:
-                return new FoodValues(4, 10, 2, 3, 0);
             case TROPICAL_FISH:
-                return new FoodValues(2, 5, 2, 3, 0);
+                // 生魚は栄養が低い
+                return new FoodValues(3, 5, 1, 1, -5);
+            // 生肉は調理しないとほぼ栄養にならない
+            case BEEF:
+            case PORKCHOP:
+                return new FoodValues(3, 4, 1, 1, -8);
+            case CHICKEN:
+            case MUTTON:
+            case RABBIT:
+                return new FoodValues(2, 3, 1, 1, -8);
             default:
                 return new FoodValues(8, 5, 3, 2, -3);
         }
