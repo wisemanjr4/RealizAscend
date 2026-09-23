@@ -83,6 +83,9 @@ public class GraveManager extends RealizModule implements Listener {
                     for (GraveData gd : list) {
                         if (now - gd.deathTime >= durationMs) {
                             toExpire.add(gd);
+                        } else if (isEmptyGrave(gd)) {
+                            // 中身が空の墓は自動消滅
+                            toExpire.add(gd);
                         }
                     }
                 }
@@ -314,6 +317,23 @@ public class GraveManager extends RealizModule implements Listener {
         gd.mainContents = main;
         gd.armorContents = armor;
         gd.offhand = inv.getItem(40);
+
+        // 中身が空になった墓は消滅させる
+        if (isEmptyGrave(gd)) {
+            Player closer = (Player) event.getPlayer();
+            removeGrave(gd);
+            closer.sendMessage(ChatColor.GRAY + "墓は空になった。");
+        }
+    }
+
+    private boolean isEmptyGrave(GraveData gd) {
+        for (ItemStack item : gd.mainContents) {
+            if (item != null && item.getType() != Material.AIR) return false;
+        }
+        for (ItemStack item : gd.armorContents) {
+            if (item != null && item.getType() != Material.AIR) return false;
+        }
+        return gd.offhand == null || gd.offhand.getType() == Material.AIR;
     }
 
     @EventHandler(ignoreCancelled = true)
