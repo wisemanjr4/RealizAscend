@@ -32,17 +32,17 @@ public class CookingStationMenu {
     private static NamespacedKey hydKey;
     private static NamespacedKey dishKey;
 
-    private static final List<Dish> DISHES = new ArrayList<>();
+    public static final List<Dish> DISHES = new ArrayList<>();
 
-    private static class Dish {
-        final List<Material> ingredients;
-        final Material baseMaterial;
-        final String name;
-        final int calories, protein, vitamins, salt, hydration;
-        final String requiredAbility;
-        final int tasteRequired;
-        final boolean perfect;
-        final String preservedType;
+    public static class Dish {
+        public final List<Material> ingredients;
+        public final Material baseMaterial;
+        public final String name;
+        public final int calories, protein, vitamins, salt, hydration;
+        public final String requiredAbility;
+        public final int tasteRequired;
+        public final boolean perfect;
+        public final String preservedType;
 
         Dish(List<Material> ingredients, Material baseMaterial, String name,
              int calories, int protein, int vitamins, int salt, int hydration,
@@ -294,7 +294,10 @@ public class CookingStationMenu {
         for (Dish dish : DISHES) {
             if (dish.perfect) continue; // パーフェクトレシピは秘密
             if (dish.isUnlocked(data)) {
-                lore.add(ChatColor.GRAY + dish.name);
+                String ingredients = dish.ingredients.stream()
+                    .map(CookingStationMenu::getMaterialJP)
+                    .reduce((a, b) -> a + "+" + b).orElse("");
+                lore.add(ChatColor.YELLOW + dish.name + ChatColor.GRAY + " = " + ingredients);
             } else {
                 if (dish.requiredAbility != null) {
                     lore.add(ChatColor.RED + "要スキル: " + abilityName(dish.requiredAbility));
@@ -303,9 +306,49 @@ public class CookingStationMenu {
                 }
             }
         }
+        lore.add("");
+        lore.add(ChatColor.AQUA + "材料をスロット0-3に置いて調理する");
         meta.setLore(lore);
         item.setItemMeta(meta);
         return item;
+    }
+
+    public static String getMaterialJP(Material mat) {
+        switch (mat) {
+            case BEEF: return "生肉";
+            case COOKED_BEEF: return "焼肉";
+            case PORKCHOP: return "豚肉";
+            case COOKED_PORKCHOP: return "焼豚";
+            case CHICKEN: return "鶏肉";
+            case COOKED_CHICKEN: return "焼鳥";
+            case MUTTON: return "羊肉";
+            case COD: return "鱈";
+            case COOKED_COD: return "焼魚";
+            case SALMON: return "鮭";
+            case COOKED_SALMON: return "焼鮭";
+            case POTATO: return "芋";
+            case CARROT: return "ニンジン";
+            case BEETROOT: return "ビート";
+            case BOWL: return "ボウル";
+            case WHEAT: return "小麦";
+            case SUGAR: return "砂糖";
+            case CHARCOAL: return "木炭";
+            case STRING: return "糸";
+            case GLASS_BOTTLE: return "瓶";
+            case MUSHROOM_STEW: return "シチュー";
+            case SWEET_BERRIES: return "ベリー";
+            case GLOW_BERRIES: return "グロウベリー";
+            case MELON_SLICE: return "スイカ";
+            case APPLE: return "リンゴ";
+            case GOLDEN_APPLE: return "金リンゴ";
+            case HONEY_BOTTLE: return "蜂蜜";
+            case COCOA_BEANS: return "ココア";
+            case PAPER: return "紙";
+            case RED_MUSHROOM: return "赤キノコ";
+            case BONE_MEAL: return "骨粉";
+            case EGG: return "卵";
+            default: return mat.name().toLowerCase();
+        }
     }
 
     private static ItemStack createCookButton() {
