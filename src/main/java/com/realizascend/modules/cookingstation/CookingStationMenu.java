@@ -195,16 +195,60 @@ public class CookingStationMenu {
 
     public static void open(Player player) {
         PlayerData data = plugin.getDataManager().getData(player);
-        Inventory inv = Bukkit.createInventory(null, 27, TITLE);
+        Inventory inv = Bukkit.createInventory(null, 54, TITLE);
 
-        for (int i = 0; i < 27; i++) {
+        // 材料スロット・ボタン・結果以外を料理表示にする
+        for (int i = 0; i < 54; i++) {
             if (i <= 3 || i == 8 || i == 17 || i == 18) continue;
-            inv.setItem(i, createHintPane(data));
+            inv.setItem(i, createFiller());
         }
         inv.setItem(17, createCookButton());
         inv.setItem(18, createCloseButton());
 
+        // 各料理を個別アイテムとして表示 (ホバーで材料が見える)
+        int dishSlot = 19;
+        for (Dish dish : DISHES) {
+            if (dish.perfect) continue;
+            if (dishSlot >= 54) break;
+            inv.setItem(dishSlot, createDishDisplayItem(dish, data));
+            dishSlot++;
+            if (dishSlot == 27) dishSlot = 28; // 27は空けておく
+        }
+
         player.openInventory(inv);
+    }
+
+    // 各料理を個別アイテムとして表示 (ホバーで材料リストを見れる)
+    private static ItemStack createDishDisplayItem(Dish dish, PlayerData data) {
+        Material mat = dish.baseMaterial;
+        ItemStack item = new ItemStack(mat);
+        ItemMeta meta = item.getItemMeta();
+        boolean unlocked = dish.isUnlocked(data);
+        meta.setDisplayName(unlocked ? ChatColor.GOLD + dish.name : ChatColor.DARK_GRAY + "???");
+
+        List<String> lore = new ArrayList<>();
+        if (unlocked) {
+            lore.add(ChatColor.GRAY + "材料: " + ChatColor.WHITE
+                + dish.ingredients.stream().map(CookingStationMenu::getMaterialJP)
+                    .reduce((a, b) -> a + " + " + b).orElse(""));
+            lore.add("");
+            lore.add(ChatColor.AQUA + "カロリー " + signed(dish.calories)
+                + " タンパク質 " + signed(dish.protein)
+                + " ビタミン " + signed(dish.vitamins)
+                + " 塩分 " + signed(dish.salt)
+                + " 水分 " + signed(dish.hydration));
+        } else {
+            lore.add(ChatColor.RED + "???");
+            if (dish.requiredAbility != null) {
+                lore.add(ChatColor.RED + "要スキル: " + abilityName(dish.requiredAbility));
+            }
+            if (dish.tasteRequired > 0) {
+                lore.add(ChatColor.RED + "要味覚Lv: " + dish.tasteRequired);
+            }
+        }
+        meta.setLore(lore);
+        item.setItemMeta(meta);
+        return item;
     }
 
     public static void updateResult(Inventory inv, Player player) {
@@ -286,29 +330,10 @@ public class CookingStationMenu {
         return item;
     }
 
-    private static ItemStack createHintPane(PlayerData data) {
+private static ItemStack createFiller() {
         ItemStack item = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ChatColor.GRAY + "レシピヒント");
-        List<String> lore = new ArrayList<>();
-        for (Dish dish : DISHES) {
-            if (dish.perfect) continue; // パーフェクトレシピは秘密
-            if (dish.isUnlocked(data)) {
-                String ingredients = dish.ingredients.stream()
-                    .map(CookingStationMenu::getMaterialJP)
-                    .reduce((a, b) -> a + "+" + b).orElse("");
-                lore.add(ChatColor.YELLOW + dish.name + ChatColor.GRAY + " = " + ingredients);
-            } else {
-                if (dish.requiredAbility != null) {
-                    lore.add(ChatColor.RED + "要スキル: " + abilityName(dish.requiredAbility));
-                } else {
-                    lore.add(ChatColor.RED + "要味覚Lv: " + dish.tasteRequired);
-                }
-            }
-        }
-        lore.add("");
-        lore.add(ChatColor.AQUA + "材料をスロット0-3に置いて調理する");
-        meta.setLore(lore);
+        meta.setDisplayName(ChatColor.GRAY + " ");
         item.setItemMeta(meta);
         return item;
     }

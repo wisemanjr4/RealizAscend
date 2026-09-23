@@ -110,7 +110,7 @@ public class CookingStationManager extends RealizModule implements Listener {
         if (!event.getView().getTitle().equals(CookingStationMenu.TITLE)) return;
 
         int slot = event.getRawSlot();
-        if (slot < 0 || slot >= 27) {
+        if (slot < 0 || slot >= 54) {
             event.setCancelled(true);
             return;
         }
