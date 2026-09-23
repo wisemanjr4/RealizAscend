@@ -83,6 +83,10 @@ public class BleedingManager extends RealizModule implements Listener {
             return;
         }
         Player player = (Player) event.getEntity();
+        // 盾ガード中: 攻撃を受け止めているので負傷・失血は発生しない
+        if (player.isBlocking() && event.getCause() == EntityDamageEvent.DamageCause.ENTITY_ATTACK) {
+            return;
+        }
         // 既に死亡済み(HP0)なら再処理しない (二重死亡の防止)
         if (player.getHealth() <= 0) {
             event.setCancelled(true);

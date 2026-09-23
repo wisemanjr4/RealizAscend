@@ -16,7 +16,9 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class CookingStationMenu {
 
@@ -40,10 +42,17 @@ public class CookingStationMenu {
         final String requiredAbility;
         final int tasteRequired;
         final boolean perfect;
+        final String preservedType;
 
         Dish(List<Material> ingredients, Material baseMaterial, String name,
              int calories, int protein, int vitamins, int salt, int hydration,
              String requiredAbility, int tasteRequired, boolean perfect) {
+            this(ingredients, baseMaterial, name, calories, protein, vitamins, salt, hydration, requiredAbility, tasteRequired, perfect, null);
+        }
+
+        Dish(List<Material> ingredients, Material baseMaterial, String name,
+             int calories, int protein, int vitamins, int salt, int hydration,
+             String requiredAbility, int tasteRequired, boolean perfect, String preservedType) {
             this.ingredients = ingredients;
             this.baseMaterial = baseMaterial;
             this.name = name;
@@ -55,6 +64,7 @@ public class CookingStationMenu {
             this.requiredAbility = requiredAbility;
             this.tasteRequired = tasteRequired;
             this.perfect = perfect;
+            this.preservedType = preservedType;
         }
 
         boolean isUnlocked(PlayerData data) {
@@ -97,6 +107,14 @@ public class CookingStationMenu {
             Material.COOKED_CHICKEN, "至高の焼き鳥", 30, 35, 10, 5, 5, "cook_grill_2", 8, true));
         DISHES.add(new Dish(List.of(Material.MELON_SLICE, Material.APPLE, Material.SWEET_BERRIES, Material.GOLDEN_APPLE, Material.BOWL),
             Material.MUSHROOM_STEW, "豪華フルーツサラダ", 20, 4, 40, 0, 40, null, 10, true));
+
+        // 保存食 (賞味期限が長い)
+        DISHES.add(new Dish(List.of(Material.COOKED_SALMON, Material.CHARCOAL, Material.STRING),
+            Material.COOKED_SALMON, "燻製サーモン", 20, 22, 4, 7, -5, "cook_smoke_2", 0, false, "SMOKED"));
+        DISHES.add(new Dish(List.of(Material.COOKED_BEEF, Material.CHARCOAL, Material.PAPER),
+            Material.COOKED_BEEF, "干し肉", 25, 24, 2, 6, -12, "cook_preserve_1", 0, false, "DRIED"));
+        DISHES.add(new Dish(List.of(Material.BEETROOT, Material.CARROT, Material.GLASS_BOTTLE),
+            Material.BEETROOT, "野菜の漬物", 10, 4, 15, 8, 10, "cook_preserve_1", 3, false, "SALTED"));
     }
 
     public static void open(Player player) {
@@ -138,6 +156,9 @@ public class CookingStationMenu {
         ItemStack dishItem = createDishItem(dish);
         dishItem.setAmount(amount);
         plugin.getFoodManager().markCooked(dishItem);
+        if (dish.preservedType != null) {
+            plugin.getFoodManager().markPreserved(dishItem, dish.preservedType);
+        }
         if (dish.perfect) {
             plugin.getFoodManager().markPreserved(dishItem, "DRIED");
             player.sendMessage(ChatColor.GOLD + "パーフェクトレシピを発見した!");
@@ -152,7 +173,7 @@ public class CookingStationMenu {
 
     private static Dish findDish(Inventory inv, Player player) {
         PlayerData data = plugin.getDataManager().getData(player);
-        List<Material> present = new ArrayList<>();
+        Set<Material> present = new HashSet<>();
         for (int i = 0; i < 4; i++) {
             ItemStack it = inv.getItem(i);
             if (it != null && it.getType() != Material.AIR) {
@@ -161,14 +182,9 @@ public class CookingStationMenu {
         }
         for (Dish dish : DISHES) {
             if (!dish.isUnlocked(data)) continue;
-            boolean match = true;
-            for (Material ingredient : dish.ingredients) {
-                if (!present.contains(ingredient)) {
-                    match = false;
-                    break;
-                }
-            }
-            if (match) return dish;
+            // 完全一致: 材料の数と種類が完全に一致する場合のみ
+            if (present.size() != dish.ingredients.size()) continue;
+            if (present.containsAll(dish.ingredients)) return dish;
         }
         return null;
     }

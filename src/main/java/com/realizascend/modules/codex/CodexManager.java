@@ -105,7 +105,12 @@ public class CodexManager extends RealizModule implements Listener {
             + "腹を壊すことがある。\n"
             + "沸かすか、ろ過すれば安心だ。\n\n"
             + "生の肉も危ない。火を通そう。\n"
-            + "燻製や塩漬けは長持ちする。");
+            + "燻製や塩漬けは長持ちする。\n\n"
+            + "調理台があれば、材料を\n"
+            + "組み合わせて本格的な\n"
+            + "料理が作れる。焼く・煮る・\n"
+            + "燻す・塩漬け...やり方で\n"
+            + "味も保存も変わる。");
         REFERENCE_PAGES.add(ChatColor.GOLD + "" + ChatColor.BOLD + "傷の手当て\n\n"
             + ChatColor.RESET + ChatColor.GRAY
             + "受けた傷の場所によって\n"
