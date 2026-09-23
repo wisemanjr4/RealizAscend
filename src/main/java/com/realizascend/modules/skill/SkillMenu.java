@@ -147,13 +147,14 @@ public class SkillMenu {
         }
 
         if (treeId != null) {
+            final String tree = treeId;
             SkillManager.SkillAbility ability = findAbilityByName(treeId, itemName, manager);
             if (ability != null) {
                 boolean success = manager.unlockAbility(player, ability);
                 if (success) {
                     // ポイント表示とアビリティ状態を更新するため再描画
                     org.bukkit.Bukkit.getScheduler().runTask(manager.getPlugin(),
-                        () -> openSkillTree(player, treeId, manager));
+                        () -> openSkillTree(player, tree, manager));
                 }
             }
         }
