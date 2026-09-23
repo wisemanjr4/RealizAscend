@@ -129,6 +129,52 @@ public class CookingStationMenu {
             Material.BREAD, "硬焼パン", 35, 5, 2, 4, -15, "cook_preserve_2", 0, false, "HARDTACK"));
         DISHES.add(new Dish(List.of(Material.MUSHROOM_STEW, Material.GLASS_BOTTLE, Material.CHARCOAL),
             Material.MUSHROOM_STEW, "保存シチュー", 35, 30, 10, 8, 25, "cook_stew_2", 5, false, "VACUUM"));
+
+        // ===== 追加: 肉・定食系 =====
+        DISHES.add(new Dish(List.of(Material.BREAD, Material.COOKED_BEEF, Material.CARROT),
+            Material.BREAD, "サンドイッチ", 25, 20, 5, 5, 0, null, 0, false));
+        DISHES.add(new Dish(List.of(Material.BREAD, Material.COOKED_CHICKEN, Material.CARROT),
+            Material.BREAD, "チキンサンド", 22, 18, 5, 4, 0, null, 0, false));
+        DISHES.add(new Dish(List.of(Material.COOKED_BEEF, Material.WHEAT, Material.MUSHROOM_STEW),
+            Material.COOKED_BEEF, "ステーキ丼", 40, 32, 6, 8, 15, "cook_grill_2", 3, false));
+        DISHES.add(new Dish(List.of(Material.CHICKEN, Material.CARROT, Material.BOWL),
+            Material.MUSHROOM_STEW, "チキンスープ", 18, 14, 8, 4, 20, "cook_stew_1", 0, false));
+        DISHES.add(new Dish(List.of(Material.SALMON, Material.COD, Material.BOWL),
+            Material.MUSHROOM_STEW, "魚介スープ", 25, 22, 6, 6, 22, "cook_stew_1", 0, false));
+        DISHES.add(new Dish(List.of(Material.MUTTON, Material.POTATO, Material.CARROT, Material.BOWL),
+            Material.MUSHROOM_STEW, "マトンシチュー", 32, 28, 8, 7, 22, "cook_stew_2", 3, false));
+
+        // ===== 追加: 焼き物・軽食 =====
+        DISHES.add(new Dish(List.of(Material.POTATO, Material.CHARCOAL),
+            Material.BAKED_POTATO, "焼き芋", 15, 2, 4, 0, 5, null, 0, false));
+        DISHES.add(new Dish(List.of(Material.BREAD, Material.MELON_SLICE, Material.SUGAR),
+            Material.BREAD, "メロンパン", 22, 4, 8, 3, 5, "cook_instant_1", 2, false));
+
+        // ===== 追加: 甘味・デザート =====
+        DISHES.add(new Dish(List.of(Material.SWEET_BERRIES, Material.SUGAR, Material.GLASS_BOTTLE),
+            Material.HONEY_BOTTLE, "ベリージャム", 15, 0, 20, 0, 10, "cook_instant_1", 2, false));
+        DISHES.add(new Dish(List.of(Material.COCOA_BEANS, Material.SUGAR, Material.PAPER),
+            Material.COOKIE, "チョコレート", 18, 2, 2, 3, -3, null, 0, false));
+        DISHES.add(new Dish(List.of(Material.SWEET_BERRIES, Material.WHEAT, Material.SUGAR),
+            Material.PUMPKIN_PIE, "ベリータルト", 25, 3, 12, 3, 5, "cook_instant_2", 3, false));
+
+        // ===== 追加: 戦闘食・行軍食 =====
+        DISHES.add(new Dish(List.of(Material.COOKED_BEEF, Material.SUGAR, Material.CHARCOAL),
+            Material.COOKED_BEEF, "ビーフジャーキー", 18, 18, 1, 10, -15, null, 0, false, "DRIED"));
+        DISHES.add(new Dish(List.of(Material.BREAD, Material.COOKED_BEEF, Material.CHARCOAL),
+            Material.BREAD, "行軍食パック", 30, 22, 3, 6, -10, null, 0, false, "VACUUM"));
+
+        // ===== 追加: 塩漬け・干物 =====
+        DISHES.add(new Dish(List.of(Material.PORKCHOP, Material.SUGAR, Material.PAPER),
+            Material.PORKCHOP, "塩漬け肉", 20, 18, 1, 12, -15, "cook_preserve_1", 0, false, "SALTED"));
+        DISHES.add(new Dish(List.of(Material.COOKED_SALMON, Material.SUGAR, Material.PAPER),
+            Material.COOKED_SALMON, "干し魚", 15, 15, 2, 6, -10, "cook_preserve_1", 0, false, "DRIED"));
+        DISHES.add(new Dish(List.of(Material.COD, Material.SUGAR, Material.PAPER),
+            Material.COD, "塩漬け魚", 12, 14, 2, 10, -8, "cook_preserve_1", 0, false, "SALTED"));
+
+        // ===== 追加: ネザー食 =====
+        DISHES.add(new Dish(List.of(Material.CRIMSON_FUNGUS, Material.CHARCOAL, Material.BONE_MEAL),
+            Material.CRIMSON_FUNGUS, "クリムゾン焼き", 10, 5, 5, 0, 5, null, 0, false));
     }
 
     public static void open(Player player) {
