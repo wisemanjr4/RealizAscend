@@ -108,13 +108,27 @@ public class CookingStationMenu {
         DISHES.add(new Dish(List.of(Material.MELON_SLICE, Material.APPLE, Material.SWEET_BERRIES, Material.GOLDEN_APPLE, Material.BOWL),
             Material.MUSHROOM_STEW, "豪華フルーツサラダ", 20, 4, 40, 0, 40, null, 10, true));
 
-        // 保存食 (賞味期限が長い)
+// 保存食 (賞味期限が長い)
         DISHES.add(new Dish(List.of(Material.COOKED_SALMON, Material.CHARCOAL, Material.STRING),
             Material.COOKED_SALMON, "燻製サーモン", 20, 22, 4, 7, -5, "cook_smoke_2", 0, false, "SMOKED"));
         DISHES.add(new Dish(List.of(Material.COOKED_BEEF, Material.CHARCOAL, Material.PAPER),
             Material.COOKED_BEEF, "干し肉", 25, 24, 2, 6, -12, "cook_preserve_1", 0, false, "DRIED"));
         DISHES.add(new Dish(List.of(Material.BEETROOT, Material.CARROT, Material.GLASS_BOTTLE),
             Material.BEETROOT, "野菜の漬物", 10, 4, 15, 8, 10, "cook_preserve_1", 3, false, "SALTED"));
+
+        // 長期保存食 (24h以上)
+        DISHES.add(new Dish(List.of(Material.COOKED_BEEF, Material.PAPER, Material.STRING),
+            Material.COOKED_BEEF, "肉の缶詰", 30, 28, 3, 8, -8, "cook_preserve_2", 0, false, "VACUUM"));
+        DISHES.add(new Dish(List.of(Material.COOKED_COD, Material.PAPER, Material.STRING),
+            Material.COOKED_COD, "魚の缶詰", 22, 25, 3, 7, -8, "cook_preserve_2", 0, false, "VACUUM"));
+        DISHES.add(new Dish(List.of(Material.COD, Material.SUGAR, Material.GLASS_BOTTLE),
+            Material.COD, "塩辛", 15, 18, 2, 12, -5, "cook_preserve_2", 5, false, "FERMENTED"));
+        DISHES.add(new Dish(List.of(Material.COOKED_CHICKEN, Material.CHARCOAL, Material.GLASS_BOTTLE),
+            Material.COOKED_CHICKEN, "鴨のコンフィ", 26, 24, 3, 9, -6, "cook_smoke_2", 5, false, "CONFIT"));
+        DISHES.add(new Dish(List.of(Material.WHEAT, Material.SUGAR),
+            Material.BREAD, "硬焼パン", 35, 5, 2, 4, -15, "cook_preserve_2", 0, false, "HARDTACK"));
+        DISHES.add(new Dish(List.of(Material.MUSHROOM_STEW, Material.GLASS_BOTTLE, Material.CHARCOAL),
+            Material.MUSHROOM_STEW, "保存シチュー", 35, 30, 10, 8, 25, "cook_stew_2", 5, false, "VACUUM"));
     }
 
     public static void open(Player player) {

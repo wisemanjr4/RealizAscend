@@ -258,6 +258,10 @@ public class FoodManager extends RealizModule implements Listener {
             case "SALTED": return SALTED_LIFE;
             case "SMOKED_SALTED": return BOTH_LIFE;
             case "DRIED": return 12 * 60 * 60 * 1000L;
+            case "VACUUM": return 24 * 60 * 60 * 1000L;
+            case "CONFIT": return 36 * 60 * 60 * 1000L;
+            case "FERMENTED": return 48 * 60 * 60 * 1000L;
+            case "HARDTACK": return 72 * 60 * 60 * 1000L;
             default: return RAW_LIFE;
         }
     }
