@@ -4,6 +4,7 @@ import com.realizascend.RealizAscend;
 import com.realizascend.core.RealizModule;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -21,6 +22,7 @@ public class WeightManager extends RealizModule {
     private final Map<Material, Double> weightFactors = new EnumMap<>(Material.class);
     private BukkitRunnable updateTask;
     private final Map<UUID, String> lastZone = new java.util.HashMap<>();
+    private final Map<UUID, Location> lastLocation = new java.util.HashMap<>();
 
     private static final double DEFAULT_WEIGHT = 8.0;
     private static final double ARMOR_WEIGHT = 20.0;
@@ -174,6 +176,16 @@ public class WeightManager extends RealizModule {
             || mat == Material.SAND || mat == Material.GRAVEL;
     }
 
+    // 重い荷物は運搬中(移動中)のみカロリー消費。静止・AFKでは減らない
+    private boolean hasMoved(Player player) {
+        Location current = player.getLocation();
+        Location last = lastLocation.put(player.getUniqueId(), current.clone());
+        if (last == null || !last.getWorld().equals(current.getWorld())) return true;
+        return last.getBlockX() != current.getBlockX()
+            || last.getBlockY() != current.getBlockY()
+            || last.getBlockZ() != current.getBlockZ();
+    }
+
     private String getWeightZone(double weight, double normalLimit, double overLimit) {
         if (weight <= normalLimit) return "NORMAL";
         if (weight <= overLimit) return "OVER";
@@ -232,8 +244,9 @@ public class WeightManager extends RealizModule {
                         }
                     }
 
-                    if (weight > actualNormal) {
-                        double extraCalories = (weight - actualNormal) * 0.001;
+                    if (weight > actualNormal && hasMoved(player)) {
+                        // 超過分の0.0001倍/5秒・上限0.5 (+2000超過で約2.4/分 ≒ 基礎代謝の4倍)
+                        double extraCalories = Math.min(0.5, (weight - actualNormal) * 0.0001);
                         plugin.getDataManager().getData(player)
                             .setCalories(Math.max(0, plugin.getDataManager().getData(player).getCalories() - extraCalories));
                     }
