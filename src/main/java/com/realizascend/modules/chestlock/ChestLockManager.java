@@ -9,6 +9,8 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.TileState;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -31,6 +33,8 @@ import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -43,15 +47,18 @@ public class ChestLockManager extends RealizModule implements Listener {
     private final NamespacedKey keyFlag;
     private final NamespacedKey ownerKey;
     private final NamespacedKey recipeKey;
+    private final NamespacedKey lockStateKey;
 
     private final Map<Location, UUID> locked = new HashMap<>();
     private final Map<Location, String> ownerNames = new HashMap<>();
+    private File locksFile;
 
     public ChestLockManager(RealizAscend plugin) {
         super(plugin);
         keyFlag = new NamespacedKey(plugin, "chestlock_key");
         ownerKey = new NamespacedKey(plugin, "chestlock_owner");
         recipeKey = new NamespacedKey(plugin, "chestlock_key_recipe");
+        lockStateKey = new NamespacedKey(plugin, "chestlock_locked");
     }
 
     @Override
@@ -64,10 +71,13 @@ public class ChestLockManager extends RealizModule implements Listener {
                 .setIngredient('S', Material.STICK));
         } catch (IllegalStateException ignored) {
         }
+        locksFile = new File(plugin.getDataFolder(), "locks.yml");
+        loadLocks();
     }
 
     @Override
     public void onDisable() {
+        saveLocks();
         HandlerList.unregisterAll(this);
         List<NamespacedKey> toRemove = new ArrayList<>();
         Iterator<Recipe> iter = Bukkit.recipeIterator();
@@ -168,6 +178,24 @@ public class ChestLockManager extends RealizModule implements Listener {
             UUID o = locked.get(loc);
             if (o != null) return o;
         }
+        // ファイルに無い場合、Tile PDCから復元 (再起動直後の同期用)
+        for (Location loc : getChestLocations(block)) {
+            if (loc.getWorld() == null) continue;
+            Block b = loc.getBlock();
+            if (b.getState() instanceof TileState tile) {
+                String s = tile.getPersistentDataContainer().get(lockStateKey, PersistentDataType.STRING);
+                if (s != null) {
+                    String[] parts = s.split("\\|", 2);
+                    try {
+                        UUID o = UUID.fromString(parts[0]);
+                        locked.put(loc, o);
+                        ownerNames.put(loc, parts.length > 1 ? parts[1] : "?");
+                        return o;
+                    } catch (IllegalArgumentException ignored) {
+                    }
+                }
+            }
+        }
         return null;
     }
 
@@ -177,6 +205,70 @@ public class ChestLockManager extends RealizModule implements Listener {
             if (n != null) return n;
         }
         return "?";
+    }
+
+    private void markLockTile(Location loc, UUID owner, String name) {
+        if (loc.getWorld() == null) return;
+        Block b = loc.getBlock();
+        if (b.getState() instanceof TileState tile) {
+            tile.getPersistentDataContainer().set(lockStateKey, PersistentDataType.STRING,
+                owner.toString() + "|" + name);
+            tile.update(true, false);
+        }
+    }
+
+    private void unmarkLockTile(Location loc) {
+        if (loc.getWorld() == null) return;
+        Block b = loc.getBlock();
+        if (b.getState() instanceof TileState tile) {
+            tile.getPersistentDataContainer().remove(lockStateKey);
+            tile.update(true, false);
+        }
+    }
+
+    private String lockToString(Location loc, UUID owner, String name) {
+        return loc.getWorld().getName() + "," + loc.getBlockX() + "," + loc.getBlockY() + ","
+            + loc.getBlockZ() + "," + owner.toString() + "," + name;
+    }
+
+    private void saveLocks() {
+        if (locksFile == null) return;
+        YamlConfiguration yaml = new YamlConfiguration();
+        List<String> list = new ArrayList<>();
+        for (Map.Entry<Location, UUID> e : locked.entrySet()) {
+            Location loc = e.getKey();
+            if (loc.getWorld() == null) continue;
+            list.add(lockToString(loc, e.getValue(), ownerNames.getOrDefault(loc, "?")));
+        }
+        yaml.set("locks", list);
+        try {
+            yaml.save(locksFile);
+        } catch (IOException e) {
+            plugin.getLogger().warning("チェストロックの保存に失敗: " + e.getMessage());
+        }
+    }
+
+    private void loadLocks() {
+        locked.clear();
+        ownerNames.clear();
+        if (locksFile == null || !locksFile.exists()) return;
+        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(locksFile);
+        int count = 0;
+        for (String s : yaml.getStringList("locks")) {
+            String[] p = s.split(",", 6);
+            if (p.length != 6) continue;
+            org.bukkit.World world = Bukkit.getWorld(p[0]);
+            if (world == null) continue;
+            try {
+                Location loc = new Location(world, Integer.parseInt(p[1]), Integer.parseInt(p[2]), Integer.parseInt(p[3]));
+                UUID owner = UUID.fromString(p[4]);
+                locked.put(loc, owner);
+                ownerNames.put(loc, p[5]);
+                count++;
+            } catch (IllegalArgumentException ignored) {
+            }
+        }
+        plugin.getLogger().info("チェストロックを " + count + " 件復元した。");
     }
 
     @EventHandler
@@ -227,7 +319,9 @@ public class ChestLockManager extends RealizModule implements Listener {
                 for (Location loc : getChestLocations(block)) {
                     locked.put(loc, player.getUniqueId());
                     ownerNames.put(loc, player.getName());
+                    markLockTile(loc, player.getUniqueId(), player.getName());
                 }
+                saveLocks();
                 player.sendMessage(ChatColor.GREEN + "鍵をかけた!");
                 event.setCancelled(true);
             }
@@ -239,7 +333,9 @@ public class ChestLockManager extends RealizModule implements Listener {
             for (Location loc : getChestLocations(block)) {
                 locked.remove(loc);
                 ownerNames.remove(loc);
+                unmarkLockTile(loc);
             }
+            saveLocks();
             player.sendMessage(ChatColor.GREEN + "鍵を開けた!");
             event.setCancelled(true);
             return;
