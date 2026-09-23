@@ -142,9 +142,8 @@ public class DeathManager extends RealizModule implements Listener {
             final Location loc = rnd;
             Bukkit.getScheduler().runTaskLater(plugin, () -> {
                 if (player.isOnline()) {
-                    player.sendMessage(ChatColor.RED + "瀕死状態: ベッド地点をリセットし "
-                        + ChatColor.GRAY + loc.getBlockX() + "," + loc.getBlockY() + "," + loc.getBlockZ()
-                        + ChatColor.RED + " へランダム転送 (5分経過で通常に戻ります)");
+                    player.sendMessage(ChatColor.RED + "瀕死状態: ベッド地点をリセットし、知らない土地へランダム転送されました "
+                        + ChatColor.GRAY + "(5分経過で通常に戻ります)");
                 }
             }, 10L);
         }

@@ -53,6 +53,8 @@ public class NutritionManager extends RealizModule implements Listener {
     private static final int FILTER_MAX_DURABILITY = 10;
 
     private final Set<UUID> recentConsumers = new HashSet<>();
+    private final Map<UUID, Integer> starvationLevel = new HashMap<>();
+    private final Map<UUID, Long> starveLastWither = new HashMap<>();
     private final NamespacedKey rawWaterNamespacedKey;
     private final NamespacedKey boiledKey;
     private final NamespacedKey filterKey;
@@ -464,8 +466,8 @@ public class NutritionManager extends RealizModule implements Listener {
             case GLOW_BERRIES:
                 return new FoodValues(5, 1, 10, 0, 15);
             case SWEET_BERRIES:
-                // ベリーはそこまで水分が多くない
-                return new FoodValues(4, 1, 8, 0, 5);
+                // ベリーはほぼ水分。栄養源としては不十分
+                return new FoodValues(2, 0, 3, 0, 4);
             case CARROT:
             case POTATO:
             case BEETROOT:
@@ -644,11 +646,28 @@ public class NutritionManager extends RealizModule implements Listener {
             player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 100, 0, false, false, true));
         }
         if (data.getHydration() <= 0) {
-            player.damage(0.5);
             plugin.getCodexManager().unlockEntry(player, "dehydration");
             player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 100, 1, false, false, true));
             player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_DIGGING, 100, 1, false, false, true));
             player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 100, 0, false, false, true));
+        }
+
+        // 栄養失調による段階的衰弱: 即死ではなく、ウィザー効果の間隔がだんだん縮まる
+        boolean starving = data.getCalories() < 5.0 && data.getProtein() < 5.0 && data.getVitamins() < 5.0;
+        boolean dehydrated = data.getHydration() <= 0;
+        if (starving || dehydrated) {
+            int level = starvationLevel.merge(player.getUniqueId(), 1, Integer::sum);
+            long intervalSec = Math.max(10, 45L - level * 3L);
+            long sinceLast = System.currentTimeMillis() - starveLastWither.getOrDefault(player.getUniqueId(), 0L);
+            if (sinceLast >= intervalSec * 1000L) {
+                starveLastWither.put(player.getUniqueId(), System.currentTimeMillis());
+                player.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 60, 0, false, false, true));
+                player.sendMessage(ChatColor.DARK_RED + (starving ? "体が飢えで蝕まれている..."
+                    : "喉が渇いて体が乾いていく..."));
+            }
+        } else {
+            starvationLevel.remove(player.getUniqueId());
+            starveLastWither.remove(player.getUniqueId());
         }
     }
 

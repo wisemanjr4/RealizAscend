@@ -5,6 +5,7 @@ import com.realizascend.core.RealizModule;
 import com.realizascend.data.PlayerData;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -41,10 +42,24 @@ public class HudManager extends RealizModule implements Listener {
             public void run() {
                 for (Player player : Bukkit.getOnlinePlayers()) {
                     updatePlayerBoard(player);
+                    updateClockTime(player);
                 }
             }
         };
         updateTask.runTaskTimer(plugin, 20L, plugin.getConfigManager().hudUpdateInterval);
+    }
+
+    // 時計所持時: アクションバーに時刻を表示
+    private void updateClockTime(Player player) {
+        if (player.getInventory().getItemInMainHand().getType() != Material.CLOCK
+            && player.getInventory().getItemInOffHand().getType() != Material.CLOCK) return;
+
+        long time = player.getWorld().getTime() % 24000;
+        int hours = (int) ((time / 1000 + 6) % 24);
+        int minutes = (int) ((time % 1000) * 60 / 1000);
+        String dayNight = (time < 12300) ? "昼" : "夜";
+        player.sendActionBar(ChatColor.GOLD + "🕐 " + ChatColor.WHITE
+            + String.format("%02d:%02d", hours, minutes) + ChatColor.GRAY + " (" + dayNight + ")");
     }
 
     private void setupPlayerBoard(Player player) {
@@ -119,6 +134,14 @@ public class HudManager extends RealizModule implements Listener {
 
         long dayCount = player.getWorld().getFullTime() / 24000;
         setScore(objective, ChatColor.DARK_GRAY + "日目: " + ChatColor.WHITE + dayCount, line--);
+
+        // コンパス所持時のみ座標を表示
+        if (player.getInventory().getItemInMainHand().getType() == Material.COMPASS
+            || player.getInventory().getItemInOffHand().getType() == Material.COMPASS) {
+            org.bukkit.Location loc = player.getLocation();
+            setScore(objective, ChatColor.WHITE + "X:" + loc.getBlockX()
+                + " Y:" + loc.getBlockY() + " Z:" + loc.getBlockZ(), line--);
+        }
 
         setScore(objective, " ", line);
     }
