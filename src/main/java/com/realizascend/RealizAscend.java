@@ -28,6 +28,7 @@ import com.realizascend.modules.cookingstation.CookingStationManager;
 import com.realizascend.modules.stealth.StealthManager;
 import com.realizascend.modules.status.StatusManager;
 import com.realizascend.modules.recipe.RecipeManager;
+import com.realizascend.modules.chestlock.ChestLockManager;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -61,6 +62,7 @@ public final class RealizAscend extends JavaPlugin {
     private TrapManager trapManager;
     private StatusManager statusManager;
     private RecipeManager recipeManager;
+    private ChestLockManager chestLockManager;
     private FarmingManager farmingManager;
     private CookingStationManager cookingStationManager;
     private StealthManager stealthManager;
@@ -96,6 +98,7 @@ public final class RealizAscend extends JavaPlugin {
         trapManager = new TrapManager(this);
         statusManager = new StatusManager(this);
         recipeManager = new RecipeManager(this);
+        chestLockManager = new ChestLockManager(this);
         farmingManager = new FarmingManager(this);
         cookingStationManager = new CookingStationManager(this);
         stealthManager = new StealthManager(this);
@@ -125,7 +128,8 @@ public final class RealizAscend extends JavaPlugin {
             cookingStationManager,
             stealthManager,
             statusManager,
-            recipeManager
+            recipeManager,
+            chestLockManager
         );
 
         moduleManager.enableAll();
@@ -188,4 +192,5 @@ public final class RealizAscend extends JavaPlugin {
     public StealthManager getStealthManager() { return stealthManager; }
     public StatusManager getStatusManager() { return statusManager; }
     public RecipeManager getRecipeManager() { return recipeManager; }
+    public ChestLockManager getChestLockManager() { return chestLockManager; }
 }

@@ -92,6 +92,10 @@ public class RecipeManager extends RealizModule implements Listener {
             new Material[]{Material.STONE, Material.STONE, Material.STONE,
                            Material.STONE, Material.IRON_INGOT, Material.STONE,
                            Material.STONE, Material.STONE, Material.STONE});
+        addRecipe("南京錠の鍵", Material.TRIPWIRE_HOOK, "チェストに鍵をかけられる", "金塊×1 + 棒×1", false,
+            new Material[]{Material.GOLD_NUGGET, null, null,
+                           Material.STICK, null, null,
+                           null, null, null});
     }
 
     private static void addRecipe(String name, Material mat, String desc, String ingredients, boolean shapeless, Material[] grid) {
