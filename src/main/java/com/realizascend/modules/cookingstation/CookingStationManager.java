@@ -38,7 +38,6 @@ import java.util.Set;
 public class CookingStationManager extends RealizModule implements Listener {
 
     private final NamespacedKey stationKey;
-    private final NamespacedKey recipeKey;
     private final NamespacedKey dishKey;
     private final NamespacedKey calKey;
     private final NamespacedKey proKey;
@@ -56,7 +55,6 @@ public class CookingStationManager extends RealizModule implements Listener {
     public CookingStationManager(RealizAscend plugin) {
         super(plugin);
         stationKey = new NamespacedKey(plugin, "cooking_station");
-        recipeKey = new NamespacedKey(plugin, "cooking_station_recipe");
         stationRecipeKey = new NamespacedKey(plugin, "cooking_station_recipe");
         dishKey = new NamespacedKey(plugin, "dish_item");
         calKey = new NamespacedKey(plugin, "dish_cal");
