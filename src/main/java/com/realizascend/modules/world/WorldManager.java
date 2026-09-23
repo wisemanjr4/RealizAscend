@@ -6,8 +6,10 @@ import com.realizascend.util.MessageUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.TileState;
 import org.bukkit.block.data.Levelled;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -23,6 +25,7 @@ import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.Map;
@@ -32,7 +35,10 @@ import java.util.concurrent.ConcurrentHashMap;
 public class WorldManager extends RealizModule implements Listener {
 
     private final Map<Location, Long> torchTimers = new ConcurrentHashMap<>();
+    // 構造理解III: TileEntityを持たないブロック (砂・砂利等) 用のフォールバック。
+    // TileStateを持つブロックは mcrealistic:gravity=false のPDCで管理する。
     private final Set<Location> gravityImmuneBlocks = ConcurrentHashMap.newKeySet();
+    private NamespacedKey mcrealisticGravity;
     private BukkitRunnable torchCheckTask;
     private BukkitRunnable gravityCleanupTask;
 
@@ -42,6 +48,7 @@ public class WorldManager extends RealizModule implements Listener {
 
     @Override
     public void onEnable() {
+        mcrealisticGravity = new NamespacedKey("mcrealistic", "gravity");
         Bukkit.getPluginManager().registerEvents(this, plugin);
 
         torchCheckTask = new BukkitRunnable() {
@@ -175,15 +182,40 @@ public class WorldManager extends RealizModule implements Listener {
         }
     }
 
+    // 構造理解Ⅲによる重力無効化の有無 (mcrealistic:gravity=false のPDC or フォールバックSet)
+    public boolean isGravityExempt(Block block) {
+        if (gravityImmuneBlocks.contains(block.getLocation())) return true;
+        if (block.getState() instanceof TileState tile) {
+            Boolean flag = tile.getPersistentDataContainer().get(mcrealisticGravity, PersistentDataType.BOOLEAN);
+            return Boolean.FALSE.equals(flag);
+        }
+        return false;
+    }
+
+    // 構造理解Ⅲ: 設置ブロックに mcrealistic:gravity=false を付与する
+    public void applyGravityExempt(Block block) {
+        if (block.getState() instanceof TileState tile) {
+            tile.getPersistentDataContainer().set(mcrealisticGravity, PersistentDataType.BOOLEAN, false);
+            tile.update(true, false);
+        } else {
+            // 砂・砂利等の非TileEntityはPDCを持てないためメモリSetで管理
+            gravityImmuneBlocks.add(block.getLocation());
+        }
+    }
+
     @EventHandler
     public void onBlockPhysics(BlockPhysicsEvent event) {
         Material type = event.getChangedType();
+
+        // 構造理解Ⅲ: mcrealistic:gravity=false の重力ブロックは落下しない
+        // (hasGravityに限定し、松明・回路等の通常更新には干渉しない)
+        if (type.hasGravity() && isGravityExempt(event.getBlock())) {
+            event.setCancelled(true);
+            return;
+        }
         if (plugin.getConfigManager().blockGravityWhitelist.contains(type)) return;
 
         if (!type.hasGravity()) return;
-
-        // 構造理解Ⅲ: 設置したブロックは落下しない
-        if (gravityImmuneBlocks.contains(event.getBlock().getLocation())) return;
 
         Block block = event.getBlock();
         Block below = block.getRelative(BlockFace.DOWN);
@@ -195,11 +227,15 @@ public class WorldManager extends RealizModule implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onBlockPlace(BlockPlaceEvent event) {
-        if (!event.getBlock().getType().hasGravity()) return;
         Player player = event.getPlayer();
         if (plugin.getDataManager().getData(player).getAbilityLevel("structure_3") > 0) {
-            gravityImmuneBlocks.add(event.getBlock().getLocation());
+            applyGravityExempt(event.getBlock());
         }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onGravityExemptBreak(BlockBreakEvent event) {
+        gravityImmuneBlocks.remove(event.getBlock().getLocation());
     }
 
     @EventHandler(priority = EventPriority.HIGH)
