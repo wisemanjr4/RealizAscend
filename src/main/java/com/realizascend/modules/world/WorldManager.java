@@ -6,12 +6,11 @@ import com.realizascend.util.MessageUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.block.TileState;
 import org.bukkit.block.data.Levelled;
 import org.bukkit.entity.Player;
+import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
@@ -25,22 +24,20 @@ import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.Map;
-import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class WorldManager extends RealizModule implements Listener {
 
+    // 構造理解III: MCRealistic側の重力を無効化する権限 (false付与で免除)
+    public static final String GRAVITY_PERMISSION = "mcrealistic.gravity";
+
     private final Map<Location, Long> torchTimers = new ConcurrentHashMap<>();
-    // 構造理解III: TileEntityを持たないブロック (砂・砂利等) 用のフォールバック。
-    // TileStateを持つブロックは mcrealistic:gravity=false のPDCで管理する。
-    private final Set<Location> gravityImmuneBlocks = ConcurrentHashMap.newKeySet();
-    private NamespacedKey mcrealisticGravity;
+    private final Map<UUID, PermissionAttachment> gravityAttachments = new ConcurrentHashMap<>();
     private BukkitRunnable torchCheckTask;
-    private BukkitRunnable gravityCleanupTask;
 
     public WorldManager(RealizAscend plugin) {
         super(plugin);
@@ -48,7 +45,6 @@ public class WorldManager extends RealizModule implements Listener {
 
     @Override
     public void onEnable() {
-        mcrealisticGravity = new NamespacedKey("mcrealistic", "gravity");
         Bukkit.getPluginManager().registerEvents(this, plugin);
 
         torchCheckTask = new BukkitRunnable() {
@@ -73,17 +69,10 @@ public class WorldManager extends RealizModule implements Listener {
         };
         torchCheckTask.runTaskTimer(plugin, 1200L, 1200L);
 
-        // 構造理解Ⅲ: 無重力ブロックの定期的クリーンアップ (変更されたブロックは除去)
-        gravityCleanupTask = new BukkitRunnable() {
-            @Override
-            public void run() {
-                gravityImmuneBlocks.removeIf(loc -> {
-                    Material type = loc.getBlock().getType();
-                    return !type.hasGravity();
-                });
-            }
-        };
-        gravityCleanupTask.runTaskTimer(plugin, 6000L, 6000L);
+        // リロード時にオンライン中の構造理解III所持者へ権限を付け直す
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            syncGravityPermission(player);
+        }
     }
 
     @Override
@@ -92,10 +81,42 @@ public class WorldManager extends RealizModule implements Listener {
         if (torchCheckTask != null) {
             torchCheckTask.cancel();
         }
-        if (gravityCleanupTask != null) {
-            gravityCleanupTask.cancel();
+        for (Map.Entry<UUID, PermissionAttachment> entry : gravityAttachments.entrySet()) {
+            Player player = Bukkit.getPlayer(entry.getKey());
+            if (player != null) {
+                player.removeAttachment(entry.getValue());
+            }
         }
-        gravityImmuneBlocks.clear();
+        gravityAttachments.clear();
+    }
+
+    // 構造理解III: mcrealistic.gravity=false を付与/剥奪する
+    public void syncGravityPermission(Player player) {
+        boolean has = plugin.getDataManager().getData(player).getAbilityLevel("structure_3") > 0;
+        PermissionAttachment attachment = gravityAttachments.get(player.getUniqueId());
+        if (has) {
+            if (attachment == null) {
+                attachment = player.addAttachment(plugin);
+                gravityAttachments.put(player.getUniqueId(), attachment);
+            }
+            attachment.setPermission(GRAVITY_PERMISSION, false);
+        } else if (attachment != null) {
+            player.removeAttachment(attachment);
+            gravityAttachments.remove(player.getUniqueId());
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onJoinSyncGravity(org.bukkit.event.player.PlayerJoinEvent event) {
+        syncGravityPermission(event.getPlayer());
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onQuitClearGravity(org.bukkit.event.player.PlayerQuitEvent event) {
+        PermissionAttachment attachment = gravityAttachments.remove(event.getPlayer().getUniqueId());
+        if (attachment != null) {
+            event.getPlayer().removeAttachment(attachment);
+        }
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -182,37 +203,9 @@ public class WorldManager extends RealizModule implements Listener {
         }
     }
 
-    // 構造理解Ⅲによる重力無効化の有無 (mcrealistic:gravity=false のPDC or フォールバックSet)
-    public boolean isGravityExempt(Block block) {
-        if (gravityImmuneBlocks.contains(block.getLocation())) return true;
-        if (block.getState() instanceof TileState tile) {
-            Boolean flag = tile.getPersistentDataContainer().get(mcrealisticGravity, PersistentDataType.BOOLEAN);
-            return Boolean.FALSE.equals(flag);
-        }
-        return false;
-    }
-
-    // 構造理解Ⅲ: 設置ブロックに mcrealistic:gravity=false を付与する
-    public void applyGravityExempt(Block block) {
-        if (block.getState() instanceof TileState tile) {
-            tile.getPersistentDataContainer().set(mcrealisticGravity, PersistentDataType.BOOLEAN, false);
-            tile.update(true, false);
-        } else {
-            // 砂・砂利等の非TileEntityはPDCを持てないためメモリSetで管理
-            gravityImmuneBlocks.add(block.getLocation());
-        }
-    }
-
     @EventHandler
     public void onBlockPhysics(BlockPhysicsEvent event) {
         Material type = event.getChangedType();
-
-        // 構造理解Ⅲ: mcrealistic:gravity=false の重力ブロックは落下しない
-        // (hasGravityに限定し、松明・回路等の通常更新には干渉しない)
-        if (type.hasGravity() && isGravityExempt(event.getBlock())) {
-            event.setCancelled(true);
-            return;
-        }
         if (plugin.getConfigManager().blockGravityWhitelist.contains(type)) return;
 
         if (!type.hasGravity()) return;
@@ -223,19 +216,6 @@ public class WorldManager extends RealizModule implements Listener {
                 || below.getType() == Material.LAVA || below.isPassable()) {
             event.setCancelled(true);
         }
-    }
-
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void onBlockPlace(BlockPlaceEvent event) {
-        Player player = event.getPlayer();
-        if (plugin.getDataManager().getData(player).getAbilityLevel("structure_3") > 0) {
-            applyGravityExempt(event.getBlock());
-        }
-    }
-
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void onGravityExemptBreak(BlockBreakEvent event) {
-        gravityImmuneBlocks.remove(event.getBlock().getLocation());
     }
 
     @EventHandler(priority = EventPriority.HIGH)

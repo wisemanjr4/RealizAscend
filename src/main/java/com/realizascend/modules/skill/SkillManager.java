@@ -460,6 +460,9 @@ public class SkillManager extends RealizModule implements Listener {
 
         player.sendMessage(ChatColor.GREEN + "解放: " + ChatColor.GOLD + ability.getName() + ChatColor.GREEN + "!");
         player.playSound(player.getLocation(), Sound.BLOCK_ENCHANTMENT_TABLE_USE, 0.5f, 1.2f);
+        if (plugin.getWorldManager() != null) {
+            plugin.getWorldManager().syncGravityPermission(player);
+        }
         return true;
     }
 
@@ -483,6 +486,9 @@ public class SkillManager extends RealizModule implements Listener {
         String displayName = SKILL_TREE_DISPLAY_NAMES.getOrDefault(skillId, skillId);
         player.sendMessage(ChatColor.RED + "リセット: " + displayName + "。レベルが " + newLevel + " に低下 (ペナルティ: -" + penalty + ")");
         player.sendMessage(ChatColor.GRAY + "使用済みポイントは失われ返還されない。");
+        if (plugin.getWorldManager() != null) {
+            plugin.getWorldManager().syncGravityPermission(player);
+        }
     }
 
     public void openSkillMenu(Player player) {
