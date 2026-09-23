@@ -28,7 +28,7 @@ hydration:
 # Bleeding settings
 bleeding:
   max-blood: 100.0
-  regeneration-rate: 0.1
+  regeneration-rate: 0.2
   fatal-threshold: 0.0
 
 # Stamina settings

@@ -113,11 +113,11 @@ public class BleedingManager extends RealizModule implements Listener {
         double bleedMult = plugin.getSkillManager().getAbilityEffectValue(player, "BLEED_SPEED");
         double bloodLoss;
         if (event.getCause() == EntityDamageEvent.DamageCause.FALL) {
-            bloodLoss = damage * 2.0;
+            bloodLoss = damage * 1.0;
         } else if (COMBAT_CAUSES.contains(event.getCause())) {
-            bloodLoss = damage * 4.0;
+            bloodLoss = damage * 1.5;
         } else {
-            bloodLoss = damage * 3.0;
+            bloodLoss = damage * 1.0;
         }
         bloodLoss *= bleedMult;
 
@@ -266,7 +266,7 @@ public class BleedingManager extends RealizModule implements Listener {
             if (!data.isTorsoInjured()) {
                 data.setTorsoInjured(true);
                 injuryTimestamps.put(player.getUniqueId(), now);
-                data.setBlood(data.getBlood() - 5.0);
+                data.setBlood(data.getBlood() - 3.0);
                 player.sendMessage(ChatColor.RED + "胴部に負傷! 内出血と感染のリスク。");
             }
         } else {
@@ -331,7 +331,7 @@ public class BleedingManager extends RealizModule implements Listener {
                 if (!com.realizascend.RealizAscend.isSurvival(player)) continue;
                 PlayerData data = plugin.getDataManager().getData(player);
 
-                if (data.getNutritionBalance() > 50.0 && data.getBlood() < cfg.bleedingMaxBlood) {
+                if (data.getNutritionBalance() > 30.0 && data.getBlood() < cfg.bleedingMaxBlood) {
                     double regenMult = plugin.getSkillManager().getAbilityEffectValue(player, "BLOOD_REGEN");
                     data.setBlood(data.getBlood() + cfg.bleedingRegenerationRate * regenMult);
                 }
