@@ -69,10 +69,10 @@ public class FarmingManager extends RealizModule implements Listener {
                 }
                 break;
             case PLUM_RAIN:
-                // 梅雨: 一部作物が腐る (水管理Ⅱで耐性)
-                double overwaterResist = nd != null
-                    ? plugin.getSkillManager().getAbilityEffectValue(near, "OVERWATER_RESIST") : 1.0;
-                if (random.nextDouble() < 0.12 * overwaterResist) {
+                // 梅雨: 一部作物が腐る (水管理Ⅱで完全防止)
+                boolean hasWaterResist = near != null
+                    && plugin.getDataManager().getData(near).getAbilityLevel("water_mgmt_2") > 0;
+                if (!hasWaterResist && random.nextDouble() < 0.12) {
                     event.setCancelled(true);
                     event.getBlock().setType(Material.AIR);
                     if (near != null) {

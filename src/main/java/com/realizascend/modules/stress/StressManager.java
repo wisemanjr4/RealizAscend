@@ -213,15 +213,28 @@ public class StressManager extends RealizModule implements Listener {
     private void applyStressEffects(Player player, PlayerData data, ConfigManager cfg) {
         double stress = data.getStress();
 
-        if (stress < cfg.stressNormalRangeMin) {
-            player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_DIGGING, 100, 0, false, false, true));
-        }
-
-        if (stress > cfg.stressNormalRangeMax) {
-            if (Math.random() < 0.1) {
-                player.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 100, 0, false, false, true));
+        if (stress < 20) {
+            // 平穏: バフ
+            player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 80, 0, true, false, true));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 80, 0, true, false, true));
+        } else if (stress < 30) {
+            // リラックス: 軽いバフ
+            player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 80, 0, true, false, true));
+        } else if (stress > 85) {
+            // パニック: 重いデバフ
+            player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 100, 1, false, false, true));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 100, 1, false, false, true));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 200, 0, false, false, true));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_DIGGING, 100, 2, false, false, true));
+        } else if (stress > 70) {
+            // 不安: 中程度のデバフ
+            player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 100, 0, false, false, true));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_DIGGING, 100, 1, false, false, true));
+            if (Math.random() < 0.2) {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 150, 0, false, false, true));
             }
         }
+        // 30-70: 通常 (デバフなし)
     }
 
     private void displayStress(Player player, PlayerData data) {

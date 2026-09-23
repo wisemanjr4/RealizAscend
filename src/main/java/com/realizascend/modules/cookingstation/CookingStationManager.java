@@ -138,6 +138,10 @@ public class CookingStationManager extends RealizModule implements Listener {
         Player player = event.getPlayer();
         PlayerData data = plugin.getDataManager().getData(player);
         double mult = 1.0 + data.getTasteLevel() * 0.01;
+        // 飽きシステム: 同じ料理を続けると栄養効率が下がる
+        String dishName = meta.getDisplayName();
+        double varietyMult = plugin.getNutritionManager().getFoodVarietyMultiplier(player, dishName);
+        mult *= varietyMult;
 
         data.setCalories(data.getCalories()
             + meta.getPersistentDataContainer().getOrDefault(calKey, PersistentDataType.INTEGER, 0) * mult);

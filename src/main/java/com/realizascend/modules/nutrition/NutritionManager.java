@@ -55,6 +55,8 @@ public class NutritionManager extends RealizModule implements Listener {
     private final Set<UUID> recentConsumers = new HashSet<>();
     private final Map<UUID, Integer> starvationLevel = new HashMap<>();
     private final Map<UUID, Long> starveLastWither = new HashMap<>();
+    private final Map<UUID, String> lastFoodKey = new HashMap<>();
+    private final Map<UUID, Integer> foodRepeatCount = new HashMap<>();
     private final NamespacedKey rawWaterNamespacedKey;
     private final NamespacedKey boiledKey;
     private final NamespacedKey filterKey;
@@ -89,6 +91,10 @@ public class NutritionManager extends RealizModule implements Listener {
         }
         recentConsumers.clear();
         boilingFurnaces.clear();
+        lastFoodKey.clear();
+        foodRepeatCount.clear();
+        starvationLevel.clear();
+        starveLastWither.clear();
         HandlerList.unregisterAll(this);
     }
 
@@ -110,8 +116,9 @@ public class NutritionManager extends RealizModule implements Listener {
         recentConsumers.add(player.getUniqueId());
 
         double gainMult = plugin.getSkillManager().getAbilityEffectValue(player, "NUTRIENT_GAIN");
+        double varietyMult = getFoodVarietyMultiplier(player, material.name());
         FoodValues food = getFoodValues(material);
-        applyNutrition(data, food, gainMult);
+        applyNutrition(data, food, gainMult * varietyMult);
         sendFoodFeedback(player, material, food);
 
         // 毒耐性: 毒の継続時間短縮
@@ -148,6 +155,25 @@ public class NutritionManager extends RealizModule implements Listener {
         if (player.getFoodLevel() != foodLevel) {
             player.setFoodLevel(foodLevel);
         }
+    }
+
+    // 飽きシステム: 同じ食べ物を続けると栄養効率が下がる (異なる食べ物でリセット)
+    public double getFoodVarietyMultiplier(Player player, String foodKey) {
+        UUID uuid = player.getUniqueId();
+        String last = lastFoodKey.getOrDefault(uuid, "");
+        int count = foodRepeatCount.getOrDefault(uuid, 0);
+        if (last.equals(foodKey)) {
+            count++;
+        } else {
+            count = 0;
+        }
+        lastFoodKey.put(uuid, foodKey);
+        foodRepeatCount.put(uuid, count);
+        double mult = Math.max(0.2, 1.0 - count * 0.15);
+        if (mult < 0.7) {
+            player.sendMessage(ChatColor.GRAY + "同じものばかり食べている...栄養が偏っている。(" + (int) (mult * 100) + "%)");
+        }
+        return mult;
     }
 
     @EventHandler
