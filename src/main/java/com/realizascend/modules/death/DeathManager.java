@@ -114,7 +114,8 @@ public class DeathManager extends RealizModule implements Listener {
                 || below == Material.SEAGRASS || below == Material.TALL_SEAGRASS
                 || below == Material.KELP || below == Material.KELP_PLANT) continue;
             if (below.name().contains("POWDER_SNOW")) continue;
-            if (at.getType().isSolid() || above.getType().isSolid()) continue; // 上下が塞がっている
+            if (world.getBlockAt(cand.getBlockX(), cand.getBlockY(), cand.getBlockZ()).getType().isSolid()
+                || world.getBlockAt(cand.getBlockX(), cand.getBlockY() + 1, cand.getBlockZ()).getType().isSolid()) continue; // 上下が塞がっている
 
             // 海系バイオームを除外
             String bn = world.getBiome(cand.getBlockX(), hy, cand.getBlockZ()).name();
