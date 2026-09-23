@@ -193,28 +193,33 @@ public class CookingStationMenu {
             Material.CRIMSON_FUNGUS, "クリムゾン焼き", 10, 5, 5, 0, 5, null, 0, false));
     }
 
-    public static void open(Player player) {
-        PlayerData data = plugin.getDataManager().getData(player);
+    public static Inventory createGUI() {
         Inventory inv = Bukkit.createInventory(null, 54, TITLE);
-
-        // 材料スロット・ボタン・結果以外を料理表示にする
         for (int i = 0; i < 54; i++) {
             if (i <= 3 || i == 8 || i == 17 || i == 18) continue;
             inv.setItem(i, createFiller());
         }
         inv.setItem(17, createCookButton());
         inv.setItem(18, createCloseButton());
+        return inv;
+    }
 
-        // 各料理を個別アイテムとして表示 (ホバーで材料が見える)
+    public static void refreshDishes(Inventory inv, Player player) {
+        PlayerData data = plugin.getDataManager().getData(player);
+        List<Dish> regular = new ArrayList<>();
+        for (Dish d : DISHES) {
+            if (!d.perfect) regular.add(d);
+        }
         int dishSlot = 19;
-        for (Dish dish : DISHES) {
-            if (dish.perfect) continue;
+        for (Dish dish : regular) {
             if (dishSlot >= 54) break;
+            if (dishSlot == 27) dishSlot = 28;
             inv.setItem(dishSlot, createDishDisplayItem(dish, data));
             dishSlot++;
-            if (dishSlot == 27) dishSlot = 28; // 27は空けておく
         }
+    }
 
+    public static void open(Player player, Inventory inv) {
         player.openInventory(inv);
     }
 
