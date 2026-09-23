@@ -9,6 +9,8 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
+import org.bukkit.block.TileState;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -29,6 +31,8 @@ import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -49,10 +53,11 @@ public class CookingStationManager extends RealizModule implements Listener {
 
     private final NamespacedKey stationRecipeKey;
 
-    // 設置された調理台の管理
+    // 設置された調理台の管理 (再起動で消えないよう stations.yml に永続化 + ブロックのTile PDCにも marking)
     private final Set<Location> stations = new java.util.HashSet<>();
     private final Map<Location, Inventory> stationGUIs = new HashMap<>();
     private final Map<UUID, Location> openStations = new HashMap<>();
+    private File stationsFile;
 
     public CookingStationManager(RealizAscend plugin) {
         super(plugin);
@@ -71,10 +76,13 @@ public class CookingStationManager extends RealizModule implements Listener {
     public void onEnable() {
         Bukkit.getPluginManager().registerEvents(this, plugin);
         registerStationRecipe();
+        stationsFile = new File(plugin.getDataFolder(), "stations.yml");
+        loadStations();
     }
 
     @Override
     public void onDisable() {
+        saveStations();
         HandlerList.unregisterAll(this);
         List<NamespacedKey> toRemove = new ArrayList<>();
         Iterator<Recipe> iter = Bukkit.recipeIterator();
@@ -113,6 +121,73 @@ public class CookingStationManager extends RealizModule implements Listener {
         return item;
     }
 
+    private Location norm(Location loc) {
+        return new Location(loc.getWorld(), loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
+    }
+
+    private Location norm(Block block) {
+        return new Location(block.getWorld(), block.getX(), block.getY(), block.getZ());
+    }
+
+    private boolean isStation(Block block) {
+        if (block.getType() != Material.SMOKER) return false;
+        if (stations.contains(norm(block))) return true;
+        if (block.getState() instanceof TileState tile) {
+            return tile.getPersistentDataContainer().has(stationKey, PersistentDataType.BYTE);
+        }
+        return false;
+    }
+
+    private void markStation(Block block) {
+        if (block.getState() instanceof TileState tile) {
+            tile.getPersistentDataContainer().set(stationKey, PersistentDataType.BYTE, (byte) 1);
+            tile.update(true, false);
+        }
+    }
+
+    private String locToString(Location loc) {
+        return loc.getWorld().getName() + "," + loc.getBlockX() + "," + loc.getBlockY() + "," + loc.getBlockZ();
+    }
+
+    private Location stringToLoc(String s) {
+        String[] p = s.split(",");
+        if (p.length != 4) return null;
+        org.bukkit.World world = Bukkit.getWorld(p[0]);
+        if (world == null) return null;
+        try {
+            return new Location(world, Integer.parseInt(p[1]), Integer.parseInt(p[2]), Integer.parseInt(p[3]));
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    private void saveStations() {
+        if (stationsFile == null) return;
+        YamlConfiguration yaml = new YamlConfiguration();
+        List<String> list = new ArrayList<>();
+        for (Location loc : stations) {
+            if (loc.getWorld() == null) continue;
+            list.add(locToString(loc));
+        }
+        yaml.set("stations", list);
+        try {
+            yaml.save(stationsFile);
+        } catch (IOException e) {
+            plugin.getLogger().warning("調理台の保存に失敗: " + e.getMessage());
+        }
+    }
+
+    private void loadStations() {
+        stations.clear();
+        if (stationsFile == null || !stationsFile.exists()) return;
+        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(stationsFile);
+        for (String s : yaml.getStringList("stations")) {
+            Location loc = stringToLoc(s);
+            if (loc != null) stations.add(loc);
+        }
+        plugin.getLogger().info("調理台を " + stations.size() + " 件復元した。");
+    }
+
     // ===== 設置 =====
     @EventHandler
     public void onPlaceStation(PlayerInteractEvent event) {
@@ -126,7 +201,9 @@ public class CookingStationManager extends RealizModule implements Listener {
 
         event.setCancelled(true);
         target.setType(Material.SMOKER);
-        stations.add(target.getLocation());
+        markStation(target);
+        stations.add(norm(target));
+        saveStations();
 
         PlayerInventory inv = event.getPlayer().getInventory();
         ItemStack held = inv.getItemInMainHand();
@@ -150,12 +227,13 @@ public class CookingStationManager extends RealizModule implements Listener {
     public void onStationInteract(PlayerInteractEvent event) {
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
         Block block = event.getClickedBlock();
-        if (block == null || block.getType() != Material.SMOKER) return;
-        if (!stations.contains(block.getLocation())) return;
+        if (block == null) return;
+        if (!isStation(block)) return;
 
         event.setCancelled(true);
         Player player = event.getPlayer();
-        Location loc = block.getLocation();
+        Location loc = norm(block);
+        stations.add(loc);
 
         Inventory gui = stationGUIs.computeIfAbsent(loc,
             k -> CookingStationMenu.createGUI());
@@ -166,8 +244,9 @@ public class CookingStationManager extends RealizModule implements Listener {
     // ===== 調理台を壊したら中身をドロップ =====
     @EventHandler
     public void onStationBreak(BlockBreakEvent event) {
-        Location loc = event.getBlock().getLocation();
-        if (!stations.contains(loc)) return;
+        Block broken = event.getBlock();
+        if (!isStation(broken)) return;
+        Location loc = norm(broken);
 
         event.setCancelled(true);
         Inventory gui = stationGUIs.remove(loc);
@@ -180,6 +259,7 @@ public class CookingStationManager extends RealizModule implements Listener {
             }
         }
         stations.remove(loc);
+        saveStations();
         event.getPlayer().sendMessage(ChatColor.YELLOW + "調理台を回収した。");
         loc.getBlock().setType(Material.AIR);
         loc.getWorld().dropItemNaturally(loc.clone().add(0.5, 0.5, 0.5), createStationItem());
