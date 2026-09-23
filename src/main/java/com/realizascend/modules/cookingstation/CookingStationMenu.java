@@ -268,8 +268,12 @@ public class CookingStationMenu {
             return;
         }
 
-        for (int i = 0; i < 4; i++) {
-            inv.setItem(i, null);
+        // レシピに必要な素材をスロットから1個ずつ消費する
+        for (Material ingredient : dish.ingredients) {
+            if (!consumeIngredient(inv, ingredient)) {
+                player.sendMessage(ChatColor.RED + "食材が足りない");
+                return;
+            }
         }
 
         int amount = 1;
@@ -291,9 +295,25 @@ public class CookingStationMenu {
         player.getInventory().addItem(dishItem)
             .values().forEach(left -> player.getWorld().dropItem(player.getLocation(), left));
 
-        player.closeInventory();
         player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.2f);
         plugin.getSkillManager().addXp(player, "COOKING", 8);
+        updateResult(inv, player);
+    }
+
+    private static boolean consumeIngredient(Inventory inv, Material ingredient) {
+        for (int i = 0; i < 4; i++) {
+            ItemStack it = inv.getItem(i);
+            if (it != null && it.getType() == ingredient && it.getAmount() > 0) {
+                if (it.getAmount() > 1) {
+                    it.setAmount(it.getAmount() - 1);
+                    inv.setItem(i, it);
+                } else {
+                    inv.setItem(i, null);
+                }
+                return true;
+            }
+        }
+        return false;
     }
 
     private static Dish findDish(Inventory inv, Player player) {
