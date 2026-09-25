@@ -17,7 +17,6 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
@@ -181,26 +180,6 @@ public class WorldManager extends RealizModule implements Listener {
             flowing.setLevel(1);
             loc.getBlock().setBlockData(flowing, false);
         });
-    }
-
-    @EventHandler
-    public void onWaterFlow(BlockFromToEvent event) {
-        if (!plugin.getConfigManager().worldDisableWaterSource) return;
-        if (event.getBlock().getType() != Material.WATER) return;
-
-        Block toBlock = event.getToBlock();
-        boolean playerNearby = false;
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            if (player.getWorld().equals(toBlock.getWorld())
-                    && player.getLocation().distanceSquared(toBlock.getLocation()) <= 64) {
-                playerNearby = true;
-                break;
-            }
-        }
-
-        if (!playerNearby) {
-            event.setCancelled(true);
-        }
     }
 
     @EventHandler
