@@ -670,7 +670,8 @@ public class NutritionManager extends RealizModule implements Listener {
         }
 
         if (data.getCalories() < 10.0 || data.getProtein() < 10.0 || data.getVitamins() < 10.0) {
-            player.damage(1.0);
+            // 直接ダメージではなくウィザーで段階的に進行 (食べれば回復)
+            player.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 200, 0, false, false, true));
         }
         if (data.getCalories() <= 0) {
             plugin.getCodexManager().unlockEntry(player, "starvation");

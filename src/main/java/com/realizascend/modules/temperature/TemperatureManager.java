@@ -30,7 +30,6 @@ public class TemperatureManager extends RealizModule implements Listener {
 
     private final Map<UUID, Set<PotionEffectType>> appliedEffects = new HashMap<>();
     private BukkitRunnable task;
-    private int fatalTickCounter;
 
     public TemperatureManager(RealizAscend plugin) {
         super(plugin);
@@ -38,13 +37,11 @@ public class TemperatureManager extends RealizModule implements Listener {
 
     @Override
     public void onEnable() {
-        fatalTickCounter = 0;
         Bukkit.getPluginManager().registerEvents(this, plugin);
 
         task = new BukkitRunnable() {
             @Override
             public void run() {
-                fatalTickCounter++;
                 for (Player player : Bukkit.getOnlinePlayers()) {
                     if (!com.realizascend.RealizAscend.isSurvival(player)) continue;
                     processPlayer(player);
@@ -312,10 +309,8 @@ public class TemperatureManager extends RealizModule implements Listener {
                 current.add(PotionEffectType.SLOW);
                 current.add(PotionEffectType.SLOW_DIGGING);
                 current.add(PotionEffectType.WEAKNESS);
-                if (fatalTickCounter % 2 == 0) {
-                    double newHealth = Math.max(0, player.getHealth() - 1.0);
-                    player.setHealth(newHealth);
-                }
+                // 即死ダメージではなくウィザーで段階的に進行 (温まる・ミルクで対処可能)
+                player.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 60, 0, false, false, true));
                 break;
         }
 

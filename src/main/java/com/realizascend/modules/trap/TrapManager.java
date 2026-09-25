@@ -210,18 +210,31 @@ public class TrapManager extends RealizModule implements Listener {
         return item;
     }
 
+    // 罠はプレイヤーを即死させない: トドメ分はHP1残し+ウィザーで段階的に
+    private void dealTrapDamage(LivingEntity victim, double amount) {
+        if (victim instanceof Player player && player.getHealth() - amount <= 0) {
+            double nonLethal = Math.max(0, player.getHealth() - 1.0);
+            if (nonLethal > 0) {
+                victim.damage(nonLethal);
+            }
+            victim.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 200, 1, false, false, true));
+            return;
+        }
+        victim.damage(amount);
+    }
+
     private void triggerTrap(Location loc, String type, LivingEntity victim, double mult) {
         switch (type) {
             case BEAR -> {
-                victim.damage(6.0 * mult);
+                dealTrapDamage(victim, 6.0 * mult);
                 victim.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 5 * 20, 2));
             }
             case POISON -> {
-                victim.damage(2.0 * mult);
+                dealTrapDamage(victim, 2.0 * mult);
                 victim.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 5 * 20, 1));
             }
             default -> {
-                victim.damage(8.0 * mult);
+                dealTrapDamage(victim, 8.0 * mult);
                 org.bukkit.util.Vector knockback = victim.getLocation().toVector()
                     .subtract(loc.toVector().add(new org.bukkit.util.Vector(0.5, 0, 0.5))).normalize();
                 victim.setVelocity(victim.getVelocity().add(knockback.setY(0.4).multiply(0.5)));

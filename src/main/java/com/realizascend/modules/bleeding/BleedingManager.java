@@ -145,9 +145,11 @@ public class BleedingManager extends RealizModule implements Listener {
                 player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 200, 2, false, false, true));
                 return;
             }
-            // 失血死: ダメージイベントの二重処理を防ぐため元ダメージを0にしてから死亡させる
+            // 失血死は即死させない: 元ダメージを0にしてHP1以上を維持し、ウィザーで段階的に死に向かわせる
             event.setDamage(0);
-            player.setHealth(0);
+            player.setHealth(Math.max(1.0, player.getHealth()));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 200, 0, false, false, true));
+            player.sendMessage(ChatColor.DARK_RED + "失血死寸前! 止血しないと死ぬ!");
             return;
         }
 
@@ -336,6 +338,11 @@ public class BleedingManager extends RealizModule implements Listener {
                     data.setBlood(data.getBlood() + cfg.bleedingRegenerationRate * regenMult);
                 }
 
+                // 血液ゼロのままではウィザーが進行 (止血・輸血するまで死に向かう)
+                if (data.getBlood() <= 0) {
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 60, 0, false, false, true));
+                }
+
                 if (data.isTorsoInjured()) {
                     boolean inWater = player.getLocation().getBlock().getType() == Material.WATER;
                     boolean contactDirt = isOnDirt(player);
@@ -367,10 +374,10 @@ public class BleedingManager extends RealizModule implements Listener {
                         }
                         player.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 220, 0, false, false, true));
                         player.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 120, 0, false, false, true));
-                        // 直接ダメージは5秒に1回の軽いものに抑え、治療の猶予を与える (詰み防止)
+                        // 直接ダメージではなくウィザーで進行させ、治療の猶予を与える (詰み防止)
                         damageCounter++;
                         if (damageCounter % 5 == 0) {
-                            player.damage(0.5);
+                            player.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 100, 0, false, false, true));
                         }
                     } else {
                         // 治療で重症化を脱したら再度警告できるようにする
